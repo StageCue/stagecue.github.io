@@ -41,6 +41,14 @@ class StageCue {
     bindToolbar(){
 
         document
+    .getElementById("savePlaylist")
+    .onclick = () => {
+
+        this.storage.save();
+
+    };
+
+        document
             .getElementById("openFiles")
             .onclick = () =>
                 document
