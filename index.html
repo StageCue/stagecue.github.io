@@ -3,247 +3,194 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>StageCue — Coming Soon</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+<title>StageCue</title>
 
-<style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
-
-body{
-    font-family:Inter,sans-serif;
-    background:linear-gradient(135deg,#09090f,#111827,#1d0f35);
-    color:#fff;
-    height:100vh;
-    overflow:hidden;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-}
-
-/* Animated background */
-body::before{
-    content:"";
-    position:absolute;
-    inset:-20%;
-    background:
-        radial-gradient(circle,#7c3aed55 0%,transparent 35%),
-        radial-gradient(circle,#3b82f655 0%,transparent 35%);
-    animation:move 14s linear infinite alternate;
-    filter:blur(80px);
-}
-
-@keyframes move{
-    from{
-        transform:translate(-10%,-5%);
-    }
-    to{
-        transform:translate(15%,10%);
-    }
-}
-
-.container{
-    position:relative;
-    z-index:2;
-    text-align:center;
-    max-width:850px;
-    padding:40px;
-}
-
-.logo{
-    width:130px;
-    height:130px;
-    margin:auto;
-    border-radius:30px;
-    background:linear-gradient(135deg,#7c3aed,#3b82f6);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:72px;
-    font-weight:800;
-    box-shadow:0 0 50px rgba(124,58,237,.6);
-    animation:pulse 3s infinite;
-}
-
-@keyframes pulse{
-    0%,100%{
-        transform:scale(1);
-        box-shadow:0 0 40px rgba(124,58,237,.4);
-    }
-    50%{
-        transform:scale(1.08);
-        box-shadow:0 0 80px rgba(124,58,237,.9);
-    }
-}
-
-h1{
-    margin-top:35px;
-    font-size:72px;
-    font-weight:800;
-    letter-spacing:-2px;
-}
-
-.gradient{
-    background:linear-gradient(90deg,#7c3aed,#60a5fa);
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
-}
-
-.subtitle{
-    margin-top:20px;
-    font-size:22px;
-    color:#d1d5db;
-    line-height:1.6;
-}
-
-.typing{
-    display:inline-block;
-    overflow:hidden;
-    border-right:3px solid #7c3aed;
-    white-space:nowrap;
-    animation:
-        typing 5s steps(42,end) infinite,
-        blink .8s infinite;
-}
-
-@keyframes typing{
-    0%{width:0;}
-    40%{width:100%;}
-    70%{width:100%;}
-    100%{width:0;}
-}
-
-@keyframes blink{
-    50%{
-        border-color:transparent;
-    }
-}
-
-.progress{
-    width:420px;
-    max-width:90%;
-    margin:55px auto 20px;
-    height:10px;
-    background:#ffffff15;
-    border-radius:30px;
-    overflow:hidden;
-}
-
-.bar{
-    height:100%;
-    width:0%;
-    background:linear-gradient(90deg,#7c3aed,#60a5fa);
-    animation:loading 6s ease-in-out infinite;
-}
-
-@keyframes loading{
-    0%{width:5%;}
-    50%{width:82%;}
-    100%{width:100%;}
-}
-
-.status{
-    color:#a5b4fc;
-    font-size:18px;
-    letter-spacing:2px;
-    animation:fade 2s infinite;
-}
-
-@keyframes fade{
-    0%,100%{
-        opacity:1;
-    }
-    50%{
-        opacity:.35;
-    }
-}
-
-.footer{
-    margin-top:70px;
-    color:#9ca3af;
-    font-size:15px;
-}
-
-.dot{
-    position:absolute;
-    width:6px;
-    height:6px;
-    background:#8b5cf6;
-    border-radius:50%;
-    opacity:.5;
-    animation:float 8s linear infinite;
-}
-
-@keyframes float{
-    from{
-        transform:translateY(100vh) scale(0);
-    }
-    to{
-        transform:translateY(-120vh) scale(1.5);
-    }
-}
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<div class="container">
+<header class="toolbar">
 
-<div class="logo">S</div>
+<div class="logo">
+🎬 StageCue
+</div>
 
-<h1><span class="gradient">StageCue</span></h1>
+<div class="toolbar-buttons">
 
-<div class="subtitle">
-<span class="typing">
-Building the next generation stage management platform...
+<button id="addBtn">
+➕ Add Videos
+</button>
+
+<button id="outputBtn">
+🖥 Output
+</button>
+
+<button id="blackBtn">
+⬛ Black
+</button>
+
+<button id="fullscreenBtn">
+⛶ Fullscreen
+</button>
+
+<input
+type="file"
+id="fileInput"
+accept="video/*"
+multiple
+hidden>
+
+</div>
+
+</header>
+
+<div class="main">
+
+<!-- LEFT -->
+
+<aside class="playlist-panel">
+
+<div class="panel-title">
+
+Playlist
+
+<span id="clipCount">
+0 clips
 </span>
+
 </div>
 
-<div class="progress">
-<div class="bar"></div>
-</div>
+<div id="playlist">
 
-<div class="status">
-🚀 ON THE WAY TO RELEASE
-</div>
+<div class="empty">
 
-<div class="footer">
-Coming Soon • Stay Tuned
+Drop videos here
+
 </div>
 
 </div>
 
-<script>
-// Floating particles
-for(let i=0;i<45;i++){
-    const d=document.createElement("div");
-    d.className="dot";
-    d.style.left=Math.random()*100+"vw";
-    d.style.animationDuration=(5+Math.random()*8)+"s";
-    d.style.animationDelay=Math.random()*8+"s";
-    d.style.opacity=Math.random();
-    document.body.appendChild(d);
-}
+</aside>
 
-// Animated loading text
-const status=document.querySelector(".status");
-const texts=[
-    "🚀 ON THE WAY TO RELEASE",
-    "⚡ BUILDING AMAZING FEATURES",
-    "🎭 PERFECTING THE EXPERIENCE",
-    "✨ COMING SOON"
-];
+<!-- CENTER -->
 
-let i=0;
-setInterval(()=>{
-    i=(i+1)%texts.length;
-    status.textContent=texts[i];
-},2500);
-</script>
+<section class="viewer">
+
+<div class="preview">
+
+<video
+id="player"
+preload="metadata"
+controls
+></video>
+
+<div id="overlay">
+
+READY
+
+</div>
+
+</div>
+
+<div class="timeline">
+
+<span id="currentTime">
+00:00
+</span>
+
+<input
+type="range"
+id="seekBar"
+min="0"
+max="100"
+value="0">
+
+<span id="duration">
+00:00
+</span>
+
+</div>
+
+</section>
+
+</div>
+
+<footer class="transport">
+
+<div class="controls">
+
+<button id="prevBtn">
+⏮
+</button>
+
+<button id="playBtn">
+▶
+</button>
+
+<button id="pauseBtn">
+⏸
+</button>
+
+<button id="stopBtn">
+⏹
+</button>
+
+<button id="nextBtn">
+⏭
+</button>
+
+</div>
+
+<div class="volume">
+
+🔊
+
+<input
+type="range"
+id="volume"
+min="0"
+max="1"
+step="0.01"
+value="1">
+
+</div>
+
+<div class="loop">
+
+<label>
+
+<input
+type="checkbox"
+id="loopPlaylist">
+
+Loop Playlist
+
+</label>
+
+</div>
+
+</footer>
+
+<div class="statusbar">
+
+<div id="status">
+
+Ready
+
+</div>
+
+<div id="filename">
+
+No Clip Loaded
+
+</div>
+
+</div>
+
+<script src="app.js"></script>
 
 </body>
 </html>
+
