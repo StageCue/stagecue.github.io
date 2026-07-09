@@ -42,30 +42,37 @@ export class Playlist {
 
     addFiles(files) {
 
-        files.forEach(file => {
+       const clip = {
 
-            if (!file.type.startsWith("video/"))
-                return;
+    id: crypto.randomUUID(),
 
-            this.items.push({
+    name: file.name,
 
-                id: crypto.randomUUID(),
+    file,
 
-                name: file.name,
+    url: URL.createObjectURL(file),
 
-                file,
+    thumbnail: null,
 
-                url: URL.createObjectURL(file),
+    duration: null
 
-                duration: null,
+};
 
-                thumbnail: null
+this.items.push(clip);
 
-            });
+generateThumbnail(file)
+    .then(result => {
 
-        });
+        clip.thumbnail = result.thumbnail;
+
+        clip.duration =
+            this.formatDuration(
+                result.duration
+            );
 
         this.render();
+
+    });
 
         if (this.currentIndex === -1 && this.items.length) {
 
