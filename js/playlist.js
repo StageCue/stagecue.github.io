@@ -268,8 +268,21 @@ generateThumbnail(file)
 
             div.innerHTML=`
 
-            <div class="thumb"></div>
+<div class="thumb">
 
+${
+clip.thumbnail
+?
+
+`<img src="${clip.thumbnail}">`
+
+:
+
+""
+
+}
+
+</div>
             <div class="info">
 
                 <div class="title">
