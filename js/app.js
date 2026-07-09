@@ -14,15 +14,15 @@ class StageCue {
 
     constructor(){
 
-        this.storage = new Storage(this.playlist);
+    this.player = new Player();
 
-        this.player = new Player();
+    this.playlist = new Playlist(this.player);
 
-        this.playlist = new Playlist(this.player);
+    this.output = new OutputWindow(this.player);
 
-        this.output = new OutputWindow(this.player);
+    this.storage = new Storage(this.playlist);
 
-    }
+}
 
     init(){
 
