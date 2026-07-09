@@ -1,92 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="viewport"
+content="width=device-width,initial-scale=1.0">
 
 <title>StageCue</title>
 
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/components.css">
+
 </head>
 
 <body>
 
-<header class="toolbar">
+<header id="topbar">
 
-<div class="logo">
+<div id="logo">
+
 🎬 StageCue
+
 </div>
 
-<div class="toolbar-buttons">
+<div id="toolbar">
 
-<button id="addBtn">
-➕ Add Videos
+<button id="openFiles">
+
+Open
+
 </button>
 
-<button id="outputBtn">
-🖥 Output
+<button id="savePlaylist">
+
+Save
+
 </button>
 
-<button id="blackBtn">
-⬛ Black
+<button id="loadPlaylist">
+
+Load
+
 </button>
 
-<button id="fullscreenBtn">
-⛶ Fullscreen
+<button id="outputWindow">
+
+Output
+
 </button>
 
-<input
-type="file"
-id="fileInput"
-accept="video/*"
-multiple
-hidden>
+<button id="fullscreen">
+
+Fullscreen
+
+</button>
 
 </div>
 
 </header>
 
-<div class="main">
+<main id="workspace">
 
-<!-- LEFT -->
+<aside id="playlistPanel">
 
-<aside class="playlist-panel">
-
-<div class="panel-title">
+<div class="panelHeader">
 
 Playlist
 
-<span id="clipCount">
-0 clips
+<span id="playlistCount">
+
+0
+
 </span>
 
 </div>
 
 <div id="playlist">
 
-<div class="empty">
-
-Drop videos here
-
-</div>
-
 </div>
 
 </aside>
 
-<!-- CENTER -->
+<section id="previewPanel">
 
-<section class="viewer">
-
-<div class="preview">
+<div id="videoContainer">
 
 <video
-id="player"
-preload="metadata"
-controls
-></video>
+id="preview"
+playsinline
+preload="metadata">
+</video>
 
-<div id="overlay">
+<div id="previewOverlay">
 
 READY
 
@@ -94,56 +102,64 @@ READY
 
 </div>
 
-<div class="timeline">
+<div id="timeline">
 
-<span id="currentTime">
-00:00
-</span>
+<span id="current">
+
+00:00</span>
 
 <input
 type="range"
-id="seekBar"
+id="seek"
 min="0"
 max="100"
 value="0">
 
 <span id="duration">
+
 00:00
+
 </span>
 
 </div>
 
 </section>
 
-</div>
+</main>
 
-<footer class="transport">
+<footer id="transport">
 
-<div class="controls">
+<button id="previous">
 
-<button id="prevBtn">
 ⏮
+
 </button>
 
-<button id="playBtn">
+<button id="play">
+
 ▶
+
 </button>
 
-<button id="pauseBtn">
+<button id="pause">
+
 ⏸
+
 </button>
 
-<button id="stopBtn">
+<button id="stop">
+
 ⏹
+
 </button>
 
-<button id="nextBtn">
+<button id="next">
+
 ⏭
+
 </button>
 
-</div>
-
-<div class="volume">
+<div id="volumeBox">
 
 🔊
 
@@ -152,12 +168,10 @@ type="range"
 id="volume"
 min="0"
 max="1"
-step="0.01"
+step=".01"
 value="1">
 
 </div>
-
-<div class="loop">
 
 <label>
 
@@ -169,28 +183,20 @@ Loop Playlist
 
 </label>
 
-</div>
-
 </footer>
 
-<div class="statusbar">
+<input
+type="file"
+id="filePicker"
+accept="video/*"
+multiple
+hidden>
 
-<div id="status">
-
-Ready
-
-</div>
-
-<div id="filename">
-
-No Clip Loaded
-
-</div>
-
-</div>
-
-<script src="app.js"></script>
+<script type="module"
+src="js/app.js">
+</script>
 
 </body>
+
 </html>
 
