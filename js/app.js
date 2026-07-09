@@ -3,6 +3,7 @@
 // Application Entry Point
 // ==============================================
 
+import { Storage } from "./storage.js";
 import { Playlist } from "./playlist.js";
 import { Player } from "./player.js";
 import { OutputWindow } from "./output.js";
@@ -12,6 +13,8 @@ import { registerShortcuts } from "./shortcuts.js";
 class StageCue {
 
     constructor(){
+
+        this.storage = new Storage(this.playlist);
 
         this.player = new Player();
 
