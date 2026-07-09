@@ -64,47 +64,60 @@ export class Playlist {
     // Add files
     //-----------------------------------
 
-    addFiles(files) {
+    async addFiles(files) {
 
-       const clip = {
+    for (const file of files) {
 
-    id: crypto.randomUUID(),
+        if (!file.type.startsWith("video/")) {
+            continue;
+        }
 
-    name: file.name,
+        const clip = {
 
-    file,
+            id: crypto.randomUUID(),
 
-    url: URL.createObjectURL(file),
+            type: "video",
 
-    thumbnail: null,
+            name: file.name,
 
-    duration: null
+            file,
 
-};
+            url: URL.createObjectURL(file),
 
-this.items.push(clip);
+            thumbnail: null,
 
-generateThumbnail(file)
-    .then(result => {
+            duration: null
 
-        clip.thumbnail = result.thumbnail;
+        };
 
-        clip.duration =
-            this.formatDuration(
-                result.duration
-            );
+        this.items.push(clip);
 
-        this.ui.render();
+        try {
 
-    });
+            const result = await generateThumbnail(file);
 
-        if (this.currentIndex === -1 && this.items.length) {
+            clip.thumbnail = result.thumbnail;
 
-            this.select(0);
+            clip.duration = this.formatDuration(result.duration);
+
+        }
+        catch (err) {
+
+            console.error(err);
 
         }
 
     }
+
+    this.ui.render();
+
+    if (this.currentIndex === -1 && this.items.length) {
+
+        this.select(0);
+
+    }
+
+}
 
     //-----------------------------------
     // Select clip
