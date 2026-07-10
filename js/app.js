@@ -3,6 +3,7 @@
 // Application Entry Point
 // ==============================================
 
+import { WelcomeScreen } from "./welcome.js";
 import { Storage } from "./storage.js";
 import { Playlist } from "./playlist.js";
 import { Player } from "./player.js";
@@ -13,6 +14,8 @@ import { registerShortcuts } from "./shortcuts.js";
 class StageCue {
 
     constructor(){
+
+    this.welcome = new WelcomeScreen();
 
     this.player = new Player();
 
@@ -25,6 +28,28 @@ class StageCue {
 }
 
     init(){
+
+        document
+.getElementById("welcomeNew")
+.onclick=()=>{
+
+    this.playlist.clear();
+
+    this.welcome.hide();
+
+};
+
+document
+.getElementById("welcomeOpen")
+.onclick=()=>{
+
+    this.welcome.hide();
+
+    document
+    .getElementById("loadPlaylist")
+    .click();
+
+};
 
         console.log("StageCue starting...");
 
