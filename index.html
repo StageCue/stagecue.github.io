@@ -3,17 +3,17 @@
 
 <head>
 
-<meta charset="UTF-8">
+    <meta charset="UTF-8">
 
-<meta name="viewport"
-content="width=device-width,initial-scale=1.0">
+    <meta name="viewport"
+          content="width=device-width,initial-scale=1.0">
 
-<title>StageCue</title>
+    <title>StageCue</title>
 
-<link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/layout.css">
-<link rel="stylesheet" href="css/components.css">
-<link rel="stylesheet" href="css/welcome.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/welcome.css">
 
 </head>
 
@@ -21,183 +21,205 @@ content="width=device-width,initial-scale=1.0">
 
 <header id="topbar">
 
-<div id="logo">
+    <div id="logo">
 
-🎬 StageCue
+        🎬 StageCue
 
-</div>
+    </div>
 
-<div id="toolbar">
+    <div id="toolbar">
 
-<button id="openFiles">
+        <button id="openFiles">
+            Open
+        </button>
 
-Open
+        <button id="savePlaylist">
+            Save
+        </button>
 
-</button>
+        <button id="loadPlaylist">
+            Load
+        </button>
 
-<button id="savePlaylist">
+        <button id="outputWindow">
+            Output
+        </button>
 
-Save
+        <button id="fullscreen">
+            Fullscreen
+        </button>
 
-</button>
-
-<button id="loadPlaylist">
-
-Load
-
-</button>
-
-<button id="outputWindow">
-
-Output
-
-</button>
-
-<button id="fullscreen">
-
-Fullscreen
-
-</button>
-
-</div>
+    </div>
 
 </header>
 
 <main id="workspace">
 
-<aside id="playlistPanel">
+    <!-- ===================================== -->
+    <!-- Playlist -->
+    <!-- ===================================== -->
 
-<div class="panelHeader">
+    <aside id="playlistPanel">
 
-Playlist
+        <div class="panelHeader">
 
-<span id="playlistCount">
+            Playlist
 
-0
+            <span id="playlistCount">
 
-</span>
+                0
 
-</div>
+            </span>
 
-<div id="playlist">
+        </div>
 
-</div>
+        <div id="playlist">
 
-</aside>
+        </div>
 
-<section id="previewPanel">
+    </aside>
 
-<div id="videoContainer">
+    <!-- ===================================== -->
+    <!-- Preview + Timeline -->
+    <!-- ===================================== -->
 
-<video
-id="preview"
-playsinline
-preload="metadata">
-</video>
+    <section id="previewPanel">
 
-<div id="previewOverlay">
+        <!-- Preview -->
 
-READY
+        <div id="videoContainer">
 
-</div>
+            <video
+                id="preview"
+                playsinline
+                preload="metadata">
+            </video>
 
-</div>
+            <div id="previewOverlay">
 
-<div id="timeline">
+                READY
 
-<span id="current">
+            </div>
 
-00:00</span>
+        </div>
 
-<input
-type="range"
-id="seek"
-min="0"
-max="100"
-value="0">
+        <!-- Timeline -->
 
-<span id="duration">
+        <div id="timeline">
 
-00:00
+            <!-- Toolbar -->
 
-</span>
+            <div class="timeline-toolbar">
 
-</div>
+                <span id="current">
 
-</section>
+                    00:00
+
+                </span>
+
+                <input
+                    type="range"
+                    id="seek"
+                    min="0"
+                    max="100"
+                    value="0">
+
+                <span id="duration">
+
+                    00:00
+
+                </span>
+
+            </div>
+
+            <!-- Timeline canvas -->
+
+            <canvas id="timelineCanvas"></canvas>
+
+        </div>
+
+    </section>
 
 </main>
 
+<!-- ===================================== -->
+<!-- Transport -->
+<!-- ===================================== -->
+
 <footer id="transport">
 
-<button id="previous">
+    <div>
 
-⏮
+        <button id="previous">
 
-</button>
+            ⏮
 
-<button id="play">
+        </button>
 
-▶
+        <button id="play">
 
-</button>
+            ▶
 
-<button id="pause">
+        </button>
 
-⏸
+        <button id="pause">
 
-</button>
+            ⏸
 
-<button id="stop">
+        </button>
 
-⏹
+        <button id="stop">
 
-</button>
+            ⏹
 
-<button id="next">
+        </button>
 
-⏭
+        <button id="next">
 
-</button>
+            ⏭
 
-<div id="volumeBox">
+        </button>
 
-🔊
+    </div>
 
-<input
-type="range"
-id="volume"
-min="0"
-max="1"
-step=".01"
-value="1">
+    <div id="volumeBox">
 
-</div>
+        🔊
 
-<label>
+        <input
+            type="range"
+            id="volume"
+            min="0"
+            max="1"
+            step=".01"
+            value="1">
 
-<input
-type="checkbox"
-id="loopPlaylist">
+    </div>
 
-Loop Playlist
+    <label>
 
-</label>
+        <input
+            type="checkbox"
+            id="loopPlaylist">
+
+        Loop Playlist
+
+    </label>
 
 </footer>
 
 <input
-type="file"
-id="filePicker"
-accept="video/*"
-multiple
-hidden>
+    type="file"
+    id="filePicker"
+    accept="video/*"
+    multiple
+    hidden>
 
-<script type="module"
-src="js/app.js">
+<script
+    type="module"
+    src="js/app.js">
 </script>
 
 </body>
 
 </html>
-
