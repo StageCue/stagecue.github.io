@@ -3,223 +3,344 @@
 
 <head>
 
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width,initial-scale=1.0">
+<meta name="viewport"
+content="width=device-width,initial-scale=1.0">
 
-    <title>StageCue</title>
+<title>StageCue</title>
 
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/layout.css">
-    <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/welcome.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/welcome.css">
 
 </head>
 
+
 <body>
+
+
+<!-- ==========================================
+     TOP BAR
+========================================== -->
 
 <header id="topbar">
 
-    <div id="logo">
 
-        🎬 StageCue
+<div id="logo">
 
-    </div>
+🎬 StageCue
 
-    <div id="toolbar">
+</div>
 
-        <button id="openFiles">
-            Open
-        </button>
 
-        <button id="savePlaylist">
-            Save
-        </button>
+<div id="toolbar">
 
-        <button id="loadPlaylist">
-            Load
-        </button>
 
-        <button id="outputWindow">
-            Output
-        </button>
+<button id="openFiles">
+Open
+</button>
 
-        <button id="fullscreen">
-            Fullscreen
-        </button>
 
-    </div>
+<button id="savePlaylist">
+Save
+</button>
+
+
+<button id="loadPlaylist">
+Load
+</button>
+
+
+<button id="outputWindow">
+Output
+</button>
+
+
+<button id="fullscreen">
+Fullscreen
+</button>
+
+
+</div>
+
 
 </header>
 
+
+
+
+<!-- ==========================================
+     WORKSPACE
+========================================== -->
+
 <main id="workspace">
 
-    <!-- ===================================== -->
-    <!-- Playlist -->
-    <!-- ===================================== -->
 
-    <aside id="playlistPanel">
 
-        <div class="panelHeader">
+<!-- ==========================================
+     PLAYLIST
+========================================== -->
 
-            Playlist
 
-            <span id="playlistCount">
+<aside id="playlistPanel">
 
-                0
 
-            </span>
+<div class="panelHeader">
 
-        </div>
+Playlist
 
-        <div id="playlist">
+<span id="playlistCount">
+0
+</span>
 
-        </div>
+</div>
 
-    </aside>
 
-    <!-- ===================================== -->
-    <!-- Preview + Timeline -->
-    <!-- ===================================== -->
+<div id="playlist">
 
-    <section id="previewPanel">
+</div>
 
-        <!-- Preview -->
 
-        <div id="videoContainer">
+</aside>
 
-            <video
-                id="preview"
-                playsinline
-                preload="metadata">
-            </video>
 
-            <div id="previewOverlay">
 
-                READY
 
-            </div>
 
-        </div>
+<!-- ==========================================
+     PREVIEW + TIMELINE
+========================================== -->
 
-        <!-- Timeline -->
 
-        <div id="timeline">
+<section id="previewPanel">
 
-            <!-- Toolbar -->
 
-            <div class="timeline-toolbar">
 
-                <span id="current">
+<!-- VIDEO -->
 
-                    00:00
+<div id="videoContainer">
 
-                </span>
 
-                <input
-                    type="range"
-                    id="seek"
-                    min="0"
-                    max="100"
-                    value="0">
+<video
+id="preview"
+playsinline
+preload="metadata">
+</video>
 
-                <span id="duration">
 
-                    00:00
+<div id="previewOverlay">
 
-                </span>
+READY
 
-            </div>
+</div>
 
-            <!-- Timeline canvas -->
 
-            <canvas id="timelineCanvas"></canvas>
+</div>
 
-        </div>
 
-    </section>
+
+
+
+<!-- TIMELINE -->
+
+<div id="timeline">
+
+
+
+<!-- TIME CONTROL -->
+
+<div class="timeline-toolbar">
+
+
+<span id="current">
+00:00
+</span>
+
+
+<input
+type="range"
+id="seek"
+min="0"
+max="100"
+value="0">
+
+
+<span id="duration">
+00:00
+</span>
+
+
+</div>
+
+
+
+
+
+<!-- RULER -->
+
+<div class="timeline-ruler">
+
+
+<canvas></canvas>
+
+
+</div>
+
+
+
+
+
+<!-- WAVEFORM -->
+
+<div class="timeline-waveform">
+
+
+<canvas></canvas>
+
+
+</div>
+
+
+
+
+
+<!-- AUDIO VISUALIZER -->
+
+<div class="timeline-spectrum">
+
+
+<canvas></canvas>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+</section>
+
 
 </main>
 
-<!-- ===================================== -->
-<!-- Transport -->
-<!-- ===================================== -->
+
+
+
+
+<!-- ==========================================
+     TRANSPORT
+========================================== -->
+
 
 <footer id="transport">
 
-    <div>
 
-        <button id="previous">
 
-            ⏮
+<div>
 
-        </button>
 
-        <button id="play">
+<button id="previous">
+⏮
+</button>
 
-            ▶
 
-        </button>
+<button id="play">
+▶
+</button>
 
-        <button id="pause">
 
-            ⏸
+<button id="pause">
+⏸
+</button>
 
-        </button>
 
-        <button id="stop">
+<button id="stop">
+⏹
+</button>
 
-            ⏹
 
-        </button>
+<button id="next">
+⏭
+</button>
 
-        <button id="next">
 
-            ⏭
+</div>
 
-        </button>
 
-    </div>
 
-    <div id="volumeBox">
 
-        🔊
 
-        <input
-            type="range"
-            id="volume"
-            min="0"
-            max="1"
-            step=".01"
-            value="1">
+<div id="volumeBox">
 
-    </div>
 
-    <label>
+🔊
 
-        <input
-            type="checkbox"
-            id="loopPlaylist">
 
-        Loop Playlist
+<input
+type="range"
+id="volume"
+min="0"
+max="1"
+step="0.01"
+value="1">
 
-    </label>
+
+</div>
+
+
+
+
+
+<label>
+
+
+<input
+type="checkbox"
+id="loopPlaylist">
+
+
+Loop Playlist
+
+
+</label>
+
+
+
 
 </footer>
 
+
+
+
+
+<!-- ==========================================
+     FILE INPUT
+========================================== -->
+
+
 <input
-    type="file"
-    id="filePicker"
-    accept="video/*"
-    multiple
-    hidden>
+type="file"
+id="filePicker"
+accept="video/*"
+multiple
+hidden>
+
+
+
+
 
 <script
-    type="module"
-    src="js/app.js">
+type="module"
+src="js/app.js">
 </script>
 
+
 </body>
+
 
 </html>
