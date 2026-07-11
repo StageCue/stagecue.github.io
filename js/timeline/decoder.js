@@ -3,6 +3,10 @@
 // Decodes local audio/video into AudioBuffer
 // ==========================================================
 
+import { getAudioContext } from "./audio-context.js";
+
+this.context = getAudioContext();
+
 export default class Decoder {
 
     constructor() {
