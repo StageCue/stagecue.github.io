@@ -175,27 +175,30 @@ export default class Events {
     // Zoom
     //--------------------------------------------------------
 
-    onWheel(e) {
+   onWheel(e) {
 
-        e.preventDefault();
+    e.preventDefault();
 
-        if (e.ctrlKey || e.metaKey) {
+    if (e.ctrlKey || e.metaKey) {
 
-            if (e.deltaY < 0)
-                this.timeline.zoom.zoomIn();
-            else
-                this.timeline.zoom.zoomOut();
+        const rect = this.wave.getBoundingClientRect();
 
-        } else {
+        const mouseX = e.clientX - rect.left;
 
-            this.timeline.scroll.x += e.deltaY;
+        if (e.deltaY < 0)
+            this.timeline.zoom.zoomIn(mouseX);
+        else
+            this.timeline.zoom.zoomOut(mouseX);
 
-            if (this.timeline.scroll.clamp)
-                this.timeline.scroll.clamp();
+        this.timeline.scroll.onZoomChanged();
 
-        }
+    } else {
+
+        this.timeline.scroll.scroll(e.deltaY);
 
     }
+
+}
 
     //--------------------------------------------------------
     // Marker
