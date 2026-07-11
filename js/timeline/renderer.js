@@ -79,6 +79,9 @@ export default class Renderer {
 
     render() {
 
+        if (this.timeline.scroll)
+            this.timeline.scroll.update();
+
         if (
             this.waveCanvas.clientWidth !== this.lastWidth ||
             this.waveCanvas.clientHeight !== this.lastHeight
