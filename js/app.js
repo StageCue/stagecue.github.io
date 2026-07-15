@@ -22,20 +22,16 @@ class StageCue {
             new WelcomeScreen();
 
 
-
         this.player =
             null;
-
 
 
         this.playlist =
             null;
 
 
-
         this.output =
             null;
-
 
 
         this.storage =
@@ -56,7 +52,8 @@ class StageCue {
 
 
 
-        requestAnimationFrame(()=>{
+        // Wait until layout is ready
+        requestAnimationFrame(() => {
 
 
             this.player =
@@ -87,9 +84,7 @@ class StageCue {
 
             this.bindWelcome();
 
-
             this.bindToolbar();
-
 
             this.bindTransport();
 
@@ -107,28 +102,29 @@ class StageCue {
         });
 
 
-
     }
 
 
 
 
 
+    // =====================================================
+    // Welcome
+    // =====================================================
+
     bindWelcome(){
 
 
-
-        const newBtn =
+        const newButton =
             document.getElementById(
                 "welcomeNew"
             );
 
 
+        if(newButton){
 
-        if(newBtn){
 
-
-            newBtn.onclick = ()=>{
+            newButton.onclick = () => {
 
 
                 this.playlist.clear();
@@ -145,21 +141,20 @@ class StageCue {
 
 
 
-        const openBtn =
+
+        const openButton =
             document.getElementById(
                 "welcomeOpen"
             );
 
 
+        if(openButton){
 
-        if(openBtn){
 
-
-            openBtn.onclick = ()=>{
+            openButton.onclick = () => {
 
 
                 this.welcome.hide();
-
 
 
                 document
@@ -175,14 +170,15 @@ class StageCue {
         }
 
 
-
     }
 
 
 
 
 
-
+    // =====================================================
+    // Toolbar
+    // =====================================================
 
     bindToolbar(){
 
@@ -192,7 +188,7 @@ class StageCue {
         .getElementById(
             "savePlaylist"
         )
-        .onclick = ()=>{
+        .onclick = () => {
 
 
             this.storage.save();
@@ -203,11 +199,12 @@ class StageCue {
 
 
 
+
         document
         .getElementById(
             "loadPlaylist"
         )
-        .onclick = ()=>{
+        .onclick = () => {
 
 
             const input =
@@ -225,8 +222,7 @@ class StageCue {
 
 
 
-            input.onchange =
-            e=>{
+            input.onchange = e => {
 
 
                 const file =
@@ -243,8 +239,7 @@ class StageCue {
 
 
 
-                reader.onload =
-                ()=>{
+                reader.onload = () => {
 
 
                     const json =
@@ -274,7 +269,6 @@ class StageCue {
             input.click();
 
 
-
         };
 
 
@@ -285,7 +279,7 @@ class StageCue {
         .getElementById(
             "openFiles"
         )
-        .onclick = ()=>{
+        .onclick = () => {
 
 
             document
@@ -307,7 +301,7 @@ class StageCue {
         )
         .addEventListener(
             "change",
-            e=>{
+            e => {
 
 
                 this.playlist.addFiles(
@@ -328,7 +322,7 @@ class StageCue {
         .getElementById(
             "outputWindow"
         )
-        .onclick = ()=>{
+        .onclick = () => {
 
 
             this.output.open();
@@ -344,7 +338,7 @@ class StageCue {
         .getElementById(
             "fullscreen"
         )
-        .onclick = ()=>{
+        .onclick = () => {
 
 
             this.output.fullscreen();
@@ -353,14 +347,15 @@ class StageCue {
         };
 
 
-
     }
 
 
 
 
 
-
+    // =====================================================
+    // Transport
+    // =====================================================
 
     bindTransport(){
 
@@ -370,18 +365,30 @@ class StageCue {
         .getElementById(
             "play"
         )
-        .onclick =
-            ()=>this.player.play();
+        .onclick = () => {
+
+
+            this.player.play();
+
+
+        };
+
 
 
 
 
         document
         .getElementById(
-            "pause
+            "pause"
         )
-        .onclick =
-            ()=>this.player.pause();
+        .onclick = () => {
+
+
+            this.player.pause();
+
+
+        };
+
 
 
 
@@ -390,8 +397,14 @@ class StageCue {
         .getElementById(
             "stop"
         )
-        .onclick =
-            ()=>this.player.stop();
+        .onclick = () => {
+
+
+            this.player.stop();
+
+
+        };
+
 
 
 
@@ -400,8 +413,14 @@ class StageCue {
         .getElementById(
             "next"
         )
-        .onclick =
-            ()=>this.playlist.next();
+        .onclick = () => {
+
+
+            this.playlist.next();
+
+
+        };
+
 
 
 
@@ -410,8 +429,14 @@ class StageCue {
         .getElementById(
             "previous"
         )
-        .onclick =
-            ()=>this.playlist.previous();
+        .onclick = () => {
+
+
+            this.playlist.previous();
+
+
+        };
+
 
 
 
@@ -422,7 +447,7 @@ class StageCue {
         )
         .addEventListener(
             "input",
-            e=>{
+            e => {
 
 
                 this.player.setVolume(
@@ -439,7 +464,6 @@ class StageCue {
     }
 
 
-
 }
 
 
@@ -448,12 +472,11 @@ class StageCue {
 
 window.addEventListener(
     "DOMContentLoaded",
-    ()=>{
+    () => {
 
 
         window.stageCue =
             new StageCue();
-
 
 
         window.stageCue.init();
