@@ -17,7 +17,9 @@ import Ruler from "./ruler.js";
 import Waveform from "./waveform.js";
 import Spectrum from "./spectrum.js";
 
+
 export default class Timeline {
+
 
     constructor({
 
@@ -27,37 +29,54 @@ export default class Timeline {
 
     }) {
 
+
         if (!root)
-            throw new Error("Timeline root missing.");
+            throw new Error(
+                "Timeline root missing."
+            );
+
 
         if (!video)
-            throw new Error("Video element missing.");
+            throw new Error(
+                "Video element missing."
+            );
+
 
         this.root = root;
         this.video = video;
 
         this.fps = fps;
 
+
         //------------------------------------------
         // Core
         //------------------------------------------
 
-        this.zoom = new Zoom(this);
+        this.zoom =
+            new Zoom(this);
 
-        this.scroll = new Scroll(this);
+
+        this.scroll =
+            new Scroll(this);
+
+
 
         //------------------------------------------
-        // Timeline Objects
+        // Objects
         //------------------------------------------
 
         this.playhead =
             new Playhead(this);
 
+
         this.markers =
             new Markers(this);
 
+
         this.selection =
             new Selection(this);
+
+
 
         //------------------------------------------
         // Drawing
@@ -66,11 +85,15 @@ export default class Timeline {
         this.ruler =
             new Ruler(this);
 
+
         this.waveform =
             new Waveform(this);
 
+
         this.spectrum =
             new Spectrum(this);
+
+
 
         //------------------------------------------
         // UI
@@ -79,93 +102,224 @@ export default class Timeline {
         this.renderer =
             new Renderer(this);
 
+
         this.events =
             new Events(this);
 
+
+
         //------------------------------------------
-        // Video Events
+        // Events
         //------------------------------------------
 
-        this.bindVideo();
-
-        this.renderer.start();
-
-    }
-
-    //----------------------------------------------------------
-    // Video Events
-    //----------------------------------------------------------
-
-    bindVideo() {
-
-        this.video.addEventListener(
-            "loadedmetadata",
+        this.onMetadata =
             () => {
 
                 this.scroll.computeMax();
 
-            }
-        );
+            };
 
-        this.video.addEventListener(
-            "play",
+
+        this.onPlay =
             async () => {
 
                 try {
 
+
                     await this.spectrum.connect();
+
 
                     await this.spectrum.resume();
 
-                }
-
-                catch (err) {
-
-                    console.warn(err);
 
                 }
 
-            }
-        );
+                catch(err) {
+
+
+                    console.warn(
+                        "Spectrum:",
+                        err
+                    );
+
+
+                }
+
+
+            };
+
+
+
+        this.bindVideo();
+
+
+
+        this.renderer.start();
+
 
     }
 
+
+
+
+
     //----------------------------------------------------------
-    // Load Media
+    // Video events
+    //----------------------------------------------------------
+
+    bindVideo() {
+
+
+        this.video.addEventListener(
+            "loadedmetadata",
+            this.onMetadata
+        );
+
+
+        this.video.addEventListener(
+            "play",
+            this.onPlay
+        );
+
+
+    }
+
+
+
+
+
+    //----------------------------------------------------------
+    // Load media
     //----------------------------------------------------------
 
     async load(source) {
 
-        await this.waveform.load(source);
+
+        if (!source)
+            throw new Error(
+                "Missing media source"
+            );
+
+
+
+        await this.waveform.load(
+            source
+        );
+
 
         this.scroll.computeMax();
 
+
     }
+
+
+
+
 
     //----------------------------------------------------------
     // Playback
     //----------------------------------------------------------
 
-    play() {
+    async play() {
+
+
+        await this.spectrum.resume();
+
 
         return this.video.play();
 
+
     }
+
+
+
 
     pause() {
 
+
         this.video.pause();
+
 
     }
 
+
+
+
     toggle() {
+
 
         if (this.video.paused)
             return this.play();
 
+
         this.pause();
 
+
     }
+
+
+
+
+
+    //----------------------------------------------------------
+    // Seeking
+    //----------------------------------------------------------
+
+    seek(time) {
+
+
+        if (!Number.isFinite(time))
+            return;
+
+
+        this.video.currentTime =
+            Math.max(
+                0,
+                Math.min(
+                    time,
+                    this.duration
+                )
+            );
+
+
+    }
+
+
+
+
+    get duration() {
+
+
+        return this.video.duration || 0;
+
+
+    }
+
+
+
+
+    get currentTime() {
+
+
+        return this.video.currentTime || 0;
+
+
+    }
+
+
+
+
+    set currentTime(value) {
+
+
+        this.seek(value);
+
+
+    }
+
+
+
+
 
     //----------------------------------------------------------
     // Marker API
@@ -177,25 +331,40 @@ export default class Timeline {
         color
     ) {
 
+
         return this.markers.add(
             time,
             name,
             color
         );
 
+
     }
+
+
 
     removeMarker(id) {
 
+
         this.markers.remove(id);
 
+
     }
+
+
+
 
     clearMarkers() {
 
+
         this.markers.clear();
 
+
     }
+
+
+
+
 
     //----------------------------------------------------------
     // Zoom API
@@ -203,27 +372,46 @@ export default class Timeline {
 
     zoomIn() {
 
+
         this.zoom.zoomIn();
+
 
         this.scroll.onZoomChanged();
 
+
     }
+
+
+
 
     zoomOut() {
 
+
         this.zoom.zoomOut();
+
 
         this.scroll.onZoomChanged();
 
+
     }
+
+
+
 
     fit() {
 
+
         this.zoom.fit();
+
 
         this.scroll.onZoomChanged();
 
+
     }
+
+
+
+
 
     //----------------------------------------------------------
     // Selection
@@ -231,58 +419,99 @@ export default class Timeline {
 
     clearSelection() {
 
+
         this.selection.clear();
+
 
     }
 
+
+
+
+
     //----------------------------------------------------------
-    // Serialization
+    // Save
     //----------------------------------------------------------
 
     toJSON() {
 
+
         return {
 
+
+            version: 1,
+
+
             fps: this.fps,
+
 
             zoom:
                 this.zoom.pixelsPerSecond,
 
+
             scroll:
                 this.scroll.x,
+
 
             markers:
                 this.markers.toJSON(),
 
+
             selection:
                 this.selection.toJSON()
 
+
         };
+
 
     }
 
+
+
+
+
+    //----------------------------------------------------------
+    // Load
+    //----------------------------------------------------------
+
     fromJSON(data) {
+
 
         if (!data)
             return;
 
+
+
         this.zoom.pixelsPerSecond =
             data.zoom ?? 100;
+
+
 
         this.scroll.x =
             data.scroll ?? 0;
 
+
+
         this.markers.fromJSON(
-            data.markers
+            data.markers || []
         );
+
+
 
         this.selection.fromJSON(
             data.selection
         );
 
+
+
         this.scroll.computeMax();
 
+
     }
+
+
+
+
 
     //----------------------------------------------------------
     // Cleanup
@@ -290,10 +519,35 @@ export default class Timeline {
 
     destroy() {
 
+
+
+        this.video.removeEventListener(
+            "loadedmetadata",
+            this.onMetadata
+        );
+
+
+        this.video.removeEventListener(
+            "play",
+            this.onPlay
+        );
+
+
+
         this.renderer.stop();
+
 
         this.spectrum.destroy();
 
+
+
+        if (this.events.destroy)
+            this.events.destroy();
+
+
+
     }
+
+
 
 }

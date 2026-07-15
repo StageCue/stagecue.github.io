@@ -21,69 +21,52 @@ export default class Decoder {
         if (!source)
             throw new Error("No media source.");
 
-        let buffer;
+        let arrayBuffer;
 
-        //-------------------------------------------------
+        //---------------------------------------------
         // File / Blob
-        //-------------------------------------------------
+        //---------------------------------------------
 
         if (
             source instanceof File ||
             source instanceof Blob
         ) {
 
-            buffer = await source.arrayBuffer();
+            arrayBuffer = await source.arrayBuffer();
 
         }
 
-        //-------------------------------------------------
-        // Remote URL only
-        //-------------------------------------------------
+        //---------------------------------------------
+        // URL (http, https, blob, data)
+        //---------------------------------------------
 
         else if (typeof source === "string") {
-
-            if (source.startsWith("blob:")) {
-
-                throw new Error(
-
-                    "Decoder received a Blob URL. Pass the original File instead."
-
-                );
-
-            }
 
             const response = await fetch(source);
 
             if (!response.ok) {
 
                 throw new Error(
-
-                    `Unable to fetch ${source}`
-
+                    `Unable to fetch media: ${response.status}`
                 );
 
             }
 
-            buffer =
-                await response.arrayBuffer();
+            arrayBuffer = await response.arrayBuffer();
 
         }
 
         else {
 
             throw new Error(
-
-                "Unsupported source."
-
+                `Unsupported media source: ${typeof source}`
             );
 
         }
 
-        return await this.context.decodeAudioData(
+        const buffer = arrayBuffer.slice(0);
 
-            buffer.slice(0)
-
-        );
+        return await this.context.decodeAudioData(buffer);
 
     }
 

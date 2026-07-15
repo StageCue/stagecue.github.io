@@ -5,17 +5,19 @@
 
 export default class WaveformRenderer {
 
+
     constructor(timeline) {
 
         this.timeline = timeline;
 
         this.waveColor = "#5ba7ff";
-        this.waveFill = "#2f7dd6";
         this.centerLine = "#333";
 
         this.lineWidth = 1;
 
     }
+
+
 
     //---------------------------------------------------------
     // Draw waveform
@@ -30,8 +32,11 @@ export default class WaveformRenderer {
         scroll
     ) {
 
+
         if (!waveform)
             return;
+
+
 
         const peaks =
             this.timeline.waveform.peaks.getPeaks(
@@ -39,8 +44,12 @@ export default class WaveformRenderer {
                 pixelsPerSecond
             );
 
+
+
         if (!peaks)
             return;
+
+
 
         const level =
             this.timeline.waveform.peaks.getLevel(
@@ -48,56 +57,108 @@ export default class WaveformRenderer {
                 pixelsPerSecond
             );
 
-        const samplesPerPeak = level;
+
+
+        if (!level)
+            return;
+
+
 
         const pixelsPerPeak =
-            (samplesPerPeak / waveform.sampleRate) *
+            (level /
+            waveform.sampleRate) *
             pixelsPerSecond;
 
-        //---------------------------------------------
-        // Visible peak range
-        //---------------------------------------------
 
-        const firstPeak = Math.max(
-            0,
-            Math.floor(scroll / pixelsPerPeak)
-        );
 
-        const lastPeak = Math.min(
-            peaks.length / 2,
-            Math.ceil(
-                (scroll + width) /
+        if (
+            !Number.isFinite(
                 pixelsPerPeak
             )
-        );
+            ||
+            pixelsPerPeak <= 0
+        )
+            return;
 
-        //---------------------------------------------
-        // Background center line
-        //---------------------------------------------
 
-        const mid = height / 2;
+
+
+        const firstPeak =
+            Math.max(
+                0,
+                Math.floor(
+                    scroll /
+                    pixelsPerPeak
+                )
+            );
+
+
+
+        const lastPeak =
+            Math.min(
+                peaks.length / 2,
+                Math.ceil(
+                    (scroll + width) /
+                    pixelsPerPeak
+                )
+            );
+
+
+
+        const mid =
+            height / 2;
+
+
+
 
         ctx.save();
 
-        ctx.strokeStyle = this.centerLine;
+
+
+        //-------------------------------------------------
+        // Center line
+        //-------------------------------------------------
+
+        ctx.strokeStyle =
+            this.centerLine;
+
 
         ctx.beginPath();
 
-        ctx.moveTo(0, mid);
+        ctx.moveTo(
+            0,
+            mid
+        );
 
-        ctx.lineTo(width, mid);
+
+        ctx.lineTo(
+            width,
+            mid
+        );
+
 
         ctx.stroke();
 
-        //---------------------------------------------
-        // Waveform
-        //---------------------------------------------
 
-        ctx.strokeStyle = this.waveColor;
-        ctx.fillStyle = this.waveFill;
-        ctx.lineWidth = this.lineWidth;
+
+
+
+        //-------------------------------------------------
+        // Wave
+        //-------------------------------------------------
+
+        ctx.strokeStyle =
+            this.waveColor;
+
+
+        ctx.lineWidth =
+            this.lineWidth;
+
+
 
         ctx.beginPath();
+
+
 
         for (
             let i = firstPeak;
@@ -105,31 +166,70 @@ export default class WaveformRenderer {
             i++
         ) {
 
-            const x =
-                i * pixelsPerPeak - scroll;
+
 
             const min =
                 peaks[i * 2];
 
+
             const max =
                 peaks[i * 2 + 1];
 
+
+
+            if (
+                min === undefined ||
+                max === undefined
+            )
+                continue;
+
+
+
+            const x =
+                i *
+                pixelsPerPeak -
+                scroll;
+
+
+
             const y1 =
-                mid - max * (mid - 2);
+                mid -
+                max *
+                (mid - 2);
+
+
 
             const y2 =
-                mid - min * (mid - 2);
+                mid -
+                min *
+                (mid - 2);
 
-            ctx.moveTo(x + 0.5, y1);
 
-            ctx.lineTo(x + 0.5, y2);
+
+            ctx.moveTo(
+                x + 0.5,
+                y1
+            );
+
+
+            ctx.lineTo(
+                x + 0.5,
+                y2
+            );
+
 
         }
 
+
+
         ctx.stroke();
+
 
         ctx.restore();
 
+
     }
 
+
 }
+
