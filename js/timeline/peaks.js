@@ -1,14 +1,14 @@
-// ==========================================================
+   // ==========================================================
 // StageCue Waveform Peak Generator
 // Generates multi-resolution min/max peaks
 // ==========================================================
 
 export default class Peaks {
 
+
     constructor() {
 
-        // Samples represented by one peak.
-        // Each level doubles the resolution.
+        // Samples represented by one peak
         this.levels = [
             64,
             128,
@@ -22,13 +22,23 @@ export default class Peaks {
 
     }
 
+
+
     //---------------------------------------------------------
     // Generate all resolutions
     //---------------------------------------------------------
 
     generate(audioBuffer) {
 
+
+        if (!audioBuffer)
+            throw new Error(
+                "AudioBuffer missing"
+            );
+
+
         const channels = [];
+
 
         for (
             let c = 0;
@@ -36,37 +46,58 @@ export default class Peaks {
             c++
         ) {
 
+
             channels.push(
+
                 this.generateChannel(
                     audioBuffer.getChannelData(c)
                 )
+
             );
+
 
         }
 
+
+
         return {
 
-            duration: audioBuffer.duration,
+            duration:
+                audioBuffer.duration,
 
-            sampleRate: audioBuffer.sampleRate,
+
+            sampleRate:
+                audioBuffer.sampleRate,
+
 
             channels,
 
-            levels: this.levels
+
+            levels:
+                this.levels
 
         };
 
+
     }
 
+
+
+
     //---------------------------------------------------------
-    // One channel
+    // Generate one channel
     //---------------------------------------------------------
 
     generateChannel(samples) {
 
+
         const result = {};
 
-        for (const blockSize of this.levels) {
+
+        for (
+            const blockSize of this.levels
+        ) {
+
 
             result[blockSize] =
                 this.buildLevel(
@@ -74,17 +105,28 @@ export default class Peaks {
                     blockSize
                 );
 
+
         }
+
 
         return result;
 
+
     }
 
+
+
+
+
     //---------------------------------------------------------
-    // Build one LOD
+    // Build min/max level
     //---------------------------------------------------------
 
-    buildLevel(samples, blockSize) {
+    buildLevel(
+        samples,
+        blockSize
+    ) {
+
 
         const length =
             Math.ceil(
@@ -92,10 +134,18 @@ export default class Peaks {
                 blockSize
             );
 
+
+
         const peaks =
-            new Float32Array(length * 2);
+            new Float32Array(
+                length * 2
+            );
+
+
 
         let index = 0;
+
+
 
         for (
             let i = 0;
@@ -103,8 +153,11 @@ export default class Peaks {
             i += blockSize
         ) {
 
+
             let min = 1;
             let max = -1;
+
+
 
             const end =
                 Math.min(
@@ -112,67 +165,147 @@ export default class Peaks {
                     samples.length
                 );
 
+
+
             for (
                 let j = i;
                 j < end;
                 j++
             ) {
 
-                const value = samples[j];
 
-                if (value > max)
-                    max = value;
+                const value =
+                    samples[j];
+
+
 
                 if (value < min)
                     min = value;
 
+
+
+                if (value > max)
+                    max = value;
+
+
             }
+
+
 
             peaks[index++] = min;
             peaks[index++] = max;
 
+
         }
+
+
 
         return peaks;
 
+
     }
 
+
+
+
+
     //---------------------------------------------------------
-    // Best resolution for zoom
+    // Select best level for zoom
     //---------------------------------------------------------
 
-    getLevel(waveform, pixelsPerSecond) {
+    getLevel(
+        waveform,
+        pixelsPerSecond
+    ) {
+
+
+        if (!waveform)
+            return this.levels[0];
+
+
+
+        if (
+            !Number.isFinite(
+                pixelsPerSecond
+            )
+            ||
+            pixelsPerSecond <= 0
+        ) {
+
+            return waveform.levels[0];
+
+        }
+
+
+
 
         const duration =
             waveform.duration;
 
-        const pixels =
-            duration *
-            pixelsPerSecond;
+
 
         const samples =
             waveform.sampleRate *
             duration;
 
-        const spp =
-            samples /
-            pixels;
 
-        for (const level of waveform.levels) {
 
-            if (level >= spp)
-                return level;
+        const pixels =
+            duration *
+            pixelsPerSecond;
+
+
+
+        if (
+            !Number.isFinite(samples)
+            ||
+            !Number.isFinite(pixels)
+            ||
+            pixels <= 0
+        ) {
+
+            return waveform.levels[0];
 
         }
+
+
+
+        const samplesPerPixel =
+            samples / pixels;
+
+
+
+        for (
+            const level of waveform.levels
+        ) {
+
+
+            if (
+                level >= samplesPerPixel
+            ) {
+
+                return level;
+
+            }
+
+
+        }
+
+
 
         return waveform.levels[
             waveform.levels.length - 1
         ];
 
+
     }
 
+
+
+
+
     //---------------------------------------------------------
-    // Channel helper
+    // Get channel
     //---------------------------------------------------------
 
     getChannel(
@@ -180,12 +313,18 @@ export default class Peaks {
         index = 0
     ) {
 
+
         return waveform.channels[index];
+
 
     }
 
+
+
+
+
     //---------------------------------------------------------
-    // Peak helper
+    // Get peaks
     //---------------------------------------------------------
 
     getPeaks(
@@ -194,14 +333,43 @@ export default class Peaks {
         channel = 0
     ) {
 
+
         const level =
             this.getLevel(
                 waveform,
                 pixelsPerSecond
             );
 
-        return waveform.channels[channel][level];
+
+
+        const data =
+            waveform
+                .channels[channel]
+                ?.
+                [level];
+
+
+
+        if (!data) {
+
+
+            console.warn(
+                "Waveform peak data missing:",
+                level
+            );
+
+
+            return null;
+
+
+        }
+
+
+
+        return data;
+
 
     }
+
 
 }
