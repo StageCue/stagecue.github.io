@@ -19,7 +19,10 @@ export default class Spectrum {
         this.context = getAudioContext();
 
         this.source = null;
+        this.sources = [];
         this.analyser = null;
+        this.analyzers = [];
+        this.stream = null;
 
 
         this.connected = false;
@@ -38,6 +41,7 @@ export default class Spectrum {
 
         this.data = null;
         this.wave = null;
+        this.trackCount = 0;
 
     }
 
@@ -60,69 +64,145 @@ export default class Spectrum {
             );
 
 
-        this.analyser =
-            this.context.createAnalyser();
+        this.source = null;
+        this.stream = null;
+        this.sources = [];
+        this.analyser = null;
+        this.analyzers = [];
 
 
-        this.analyser.fftSize =
-            this.fftSize;
+        const useCaptureStream =
+            typeof this.video.captureStream === "function";
 
 
-        this.analyser.smoothingTimeConstant =
-            this.smoothing;
+        if (useCaptureStream) {
+
+            try {
+
+                this.stream =
+                    this.video.captureStream();
+
+            }
+
+            catch(err) {
+
+                console.warn(
+                    "Unable to capture video audio stream",
+                    err
+                );
+
+            }
+
+        }
+
+
+        const audioTracks =
+            this.stream?.getAudioTracks?.() || [];
+
+
+        if (audioTracks.length > 0) {
+
+            for (const track of audioTracks) {
+
+                const trackStream =
+                    new MediaStream([track]);
+
+                const source =
+                    this.context.createMediaStreamSource(
+                        trackStream
+                    );
+
+                const analyser =
+                    this.context.createAnalyser();
+
+                analyser.fftSize =
+                    this.fftSize;
+
+                analyser.smoothingTimeConstant =
+                    this.smoothing;
+
+                source.connect(analyser);
+                analyser.connect(this.context.destination);
+
+                this.sources.push(source);
+                this.analyzers.push(analyser);
+
+            }
+
+        }
+
+        else {
+
+            this.analyser =
+                this.context.createAnalyser();
+
+
+            this.analyser.fftSize =
+                this.fftSize;
+
+
+            this.analyser.smoothingTimeConstant =
+                this.smoothing;
 
 
 
-        try {
+            try {
 
 
-            this.source =
-                this.context.createMediaElementSource(
-                    this.video
+                this.source =
+                    this.context.createMediaElementSource(
+                        this.video
+                    );
+
+
+            }
+
+            catch(err) {
+
+
+                console.warn(
+                    "Media source already exists",
+                    err
                 );
 
 
-        }
-
-        catch(err) {
+            }
 
 
-            console.warn(
-                "Media source already exists",
-                err
+
+            if (this.source) {
+
+                this.source.connect(
+                    this.analyser
+                );
+
+            }
+
+
+            this.analyser.connect(
+                this.context.destination
             );
 
+            this.analyzers.push(this.analyser);
 
         }
-
-
-
-        if (this.source) {
-
-            this.source.connect(
-                this.analyser
-            );
-
-        }
-
-
-        this.analyser.connect(
-            this.context.destination
-        );
-
 
 
         this.data =
             new Uint8Array(
-                this.analyser.frequencyBinCount
+                this.fftSize / 2
             );
 
 
         this.wave =
             new Uint8Array(
-                this.analyser.fftSize
+                this.fftSize
             );
 
+        this.trackCount =
+            this.analyzers.length || 1;
+
+        this.updateTrackCountUI();
 
         this.connected = true;
 
@@ -130,6 +210,32 @@ export default class Spectrum {
     }
 
 
+
+    //---------------------------------------------------------
+    // Draw
+    //---------------------------------------------------------
+
+    getAnalyzers() {
+
+        if (this.analyzers.length)
+            return this.analyzers;
+
+        return [this.analyser].filter(Boolean);
+
+    }
+
+    updateTrackCountUI() {
+
+        const node =
+            this.timeline?.root?.querySelector("#audioTrackCount");
+
+        if (!node)
+            return;
+
+        node.textContent =
+            `Tracks: ${this.trackCount}`;
+
+    }
 
     //---------------------------------------------------------
     // Draw
@@ -251,11 +357,6 @@ export default class Spectrum {
     drawWave(ctx) {
 
 
-        this.analyser.getByteTimeDomainData(
-            this.wave
-        );
-
-
         const w =
             ctx.canvas.clientWidth;
 
@@ -273,50 +374,48 @@ export default class Spectrum {
         );
 
 
-
-        ctx.beginPath();
-
-
-        ctx.strokeStyle =
-            "#5ba7ff";
+        const analyzers =
+            this.getAnalyzers();
 
 
+        analyzers.forEach((analyser, trackIndex) => {
 
-        const step =
-            w / this.wave.length;
+            analyser.getByteTimeDomainData(this.wave);
 
+            const step =
+                w / this.wave.length;
 
+            let x = 0;
 
-        let x = 0;
+            ctx.beginPath();
+            ctx.strokeStyle =
+                ["#5ba7ff", "#43c36b", "#f3b341"][trackIndex % 3];
+            ctx.globalAlpha =
+                0.55 + (trackIndex * 0.1);
 
+            for (
+                let i = 0;
+                i < this.wave.length;
+                i++
+            ) {
 
+                const y =
+                    (this.wave[i] / 255) * h;
 
-        for (
-            let i = 0;
-            i < this.wave.length;
-            i++
-        ) {
+                if (i === 0)
+                    ctx.moveTo(x, y);
+                else
+                    ctx.lineTo(x, y);
 
+                x += step;
 
-            const y =
-                (this.wave[i] / 255) * h;
+            }
 
+            ctx.stroke();
 
+        });
 
-            if (i === 0)
-                ctx.moveTo(x,y);
-            else
-                ctx.lineTo(x,y);
-
-
-
-            x += step;
-
-
-        }
-
-
-        ctx.stroke();
+        ctx.globalAlpha = 1;
 
 
     }
@@ -371,6 +470,13 @@ export default class Spectrum {
     destroy() {
 
 
+        for (const source of this.sources)
+            source.disconnect();
+
+        for (const analyser of this.analyzers)
+            analyser.disconnect();
+
+
         if (this.source)
             this.source.disconnect();
 
@@ -381,6 +487,8 @@ export default class Spectrum {
 
 
         this.connected = false;
+        this.trackCount = 0;
+        this.updateTrackCountUI();
 
 
     }

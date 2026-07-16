@@ -109,13 +109,25 @@ export class Player {
                     try {
 
 
-                        await this.timeline.load(
-
+                        const source =
                             this.currentClip.file
                             ||
-                            this.currentClip.url
+                            this.currentClip.url;
 
-                        );
+
+                        const isVideoSource =
+                            (
+                                source instanceof Blob &&
+                                source.type?.startsWith("video/")
+                            )
+                            ||
+                            (
+                                typeof source === "string" &&
+                                source.startsWith("blob:")
+                            );
+
+
+                        await this.timeline.load(source);
 
 
                     }
