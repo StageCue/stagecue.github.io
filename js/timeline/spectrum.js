@@ -1,4 +1,4 @@
-// ==========================================================
+ // ==========================================================
 // StageCue Spectrum Analyzer
 // Real-time FFT visualizer
 // ==========================================================
@@ -268,60 +268,61 @@ export default class Spectrum {
 
 
     //---------------------------------------------------------
-    // Frequency bars
-    //---------------------------------------------------------
+// Frequency bars
+//---------------------------------------------------------
 
-    drawBars(ctx) {
+drawBars(ctx) {
 
+    const analyzers = this.getAnalyzers();
 
-        this.analyser.getByteFrequencyData(
-            this.data
+    if (!analyzers.length)
+        return;
+
+    const w =
+        ctx.canvas.clientWidth;
+
+    const h =
+        ctx.canvas.clientHeight;
+
+    ctx.clearRect(
+        0,
+        0,
+        w,
+        h
+    );
+
+    const analyzerData =
+        new Uint8Array(this.fftSize / 2);
+
+    const barGroups =
+        analyzers.length;
+
+    const groupWidth =
+        w / barGroups;
+
+    analyzers.forEach((analyser, trackIndex) => {
+
+        analyser.getByteFrequencyData(
+            analyzerData
         );
 
-
-        const w =
-            ctx.canvas.clientWidth;
-
-
-        const h =
-            ctx.canvas.clientHeight;
-
-
-
-        ctx.clearRect(
-            0,
-            0,
-            w,
-            h
-        );
-
-
-
-        let x = 0;
-
-
+        let x =
+            trackIndex * groupWidth;
 
         for (
             let i = 0;
-            i < this.data.length;
+            i < analyzerData.length;
             i += 2
         ) {
 
-
             const value =
-                this.data[i] / 255;
-
-
+                analyzerData[i] / 255;
 
             const height =
                 value * h;
 
-
-
             ctx.fillStyle =
-                "#5ba7ff";
-
-
+                ["#5ba7ff", "#43c36b", "#f3b341"][trackIndex % 3];
 
             ctx.fillRect(
                 x,
@@ -330,22 +331,21 @@ export default class Spectrum {
                 height
             );
 
-
-
             x +=
                 this.barWidth +
                 this.barGap;
 
-
-
-            if (x > w)
+            if (
+                x >
+                (trackIndex + 1) * groupWidth
+            )
                 break;
-
 
         }
 
+    });
 
-    }
+}
 
 
 
