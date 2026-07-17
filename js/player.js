@@ -2,7 +2,8 @@
 // StageCue Player Engine
 // ==============================================
 
-import Timeline from "./timeline.js";
+import Timeline from "./timeline/timeline.js";
+
 
 import * as Media from "./player-media.js";
 import * as Playback from "./player-playback.js";
