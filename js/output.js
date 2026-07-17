@@ -1,5 +1,6 @@
-// ==============================================
+ // ==============================================
 // StageCue Output Window
+// External Monitor Output
 // ==============================================
 
 export class OutputWindow {
@@ -9,17 +10,23 @@ export class OutputWindow {
         this.player = player;
 
         this.window = null;
+
         this.video = null;
 
     }
 
-    //---------------------------------
+
+    // =============================================
     // Open Output Window
-    //---------------------------------
+    // =============================================
 
     open() {
 
-        if (this.window && !this.window.closed) {
+
+        if (
+            this.window &&
+            !this.window.closed
+        ) {
 
             this.window.focus();
 
@@ -27,94 +34,128 @@ export class OutputWindow {
 
         }
 
+
         this.window = window.open(
+
             "",
+
             "StageCueOutput",
+
             "popup,width=1280,height=720"
+
         );
 
+
+        if (!this.window)
+            return;
+
+
+
         this.window.document.write(`
+
 <!DOCTYPE html>
+
 <html>
+
 <head>
 
-<title>StageCue Output</title>
+<title>
+StageCue Output
+</title>
+
 
 <style>
 
-html,body{
+html,
+body {
 
-margin:0;
-width:100%;
-height:100%;
+    margin:0;
 
-background:black;
+    width:100%;
 
-overflow:hidden;
+    height:100%;
 
-cursor:none;
+    background:black;
 
-}
+    overflow:hidden;
 
-video{
-
-width:100vw;
-height:100vh;
-
-object-fit:contain;
-
-background:black;
+    cursor:none;
 
 }
 
-#black{
 
-position:fixed;
+video {
 
-left:0;
-top:0;
+    width:100vw;
 
-width:100%;
-height:100%;
+    height:100vh;
 
-background:black;
+    object-fit:contain;
 
-display:none;
-
-z-index:9999;
+    background:black;
 
 }
 
-#live{
 
-position:fixed;
 
-top:20px;
-right:20px;
+#black {
 
-background:#d82f2f;
+    position:fixed;
 
-color:white;
+    left:0;
 
-padding:8px 14px;
+    top:0;
 
-font-family:Segoe UI;
+    width:100%;
 
-border-radius:20px;
+    height:100%;
 
-font-size:12px;
+    background:black;
 
-opacity:.75;
+    display:none;
+
+    z-index:9999;
 
 }
+
+
+
+#live {
+
+    position:fixed;
+
+    top:20px;
+
+    right:20px;
+
+    background:#d82f2f;
+
+    color:white;
+
+    padding:8px 14px;
+
+    font-family:Segoe UI, sans-serif;
+
+    border-radius:20px;
+
+    font-size:12px;
+
+    opacity:.75;
+
+}
+
 
 </style>
 
+
 </head>
+
 
 <body>
 
+
 <div id="black"></div>
+
 
 <div id="live">
 
@@ -122,83 +163,250 @@ LIVE OUTPUT
 
 </div>
 
-<video autoplay playsinline></video>
+
+<video
+
+autoplay
+
+playsinline
+
+>
+
+</video>
+
 
 </body>
 
 </html>
+
         `);
+
 
         this.window.document.close();
 
-        this.video =
-            this.window.document.querySelector("video");
 
-        this.player.attachOutput(this.video);
+        this.initVideo();
+
+    }
+    // =============================================
+    // Initialize Output Video
+    // =============================================
+
+    initVideo() {
+
+
+        const init = () => {
+
+
+            if (
+                !this.window ||
+                this.window.closed
+            )
+                return;
+
+
+
+            this.video =
+                this.window.document
+                    .querySelector("video");
+
+
+
+            if (!this.video)
+                return;
+
+
+
+            // Connect Player
+            this.player.attachOutput(
+                this.video
+            );
+
+
+
+            // Cleanup if popup closes
+
+            this.window.addEventListener(
+
+                "beforeunload",
+
+                () => {
+
+                    this.player.detachOutput();
+
+                    this.video = null;
+
+                }
+
+            );
+
+
+        };
+
+
+
+        if (
+            this.window.document.readyState ===
+            "complete"
+        ) {
+
+
+            init();
+
+
+        }
+
+        else {
+
+
+            this.window.addEventListener(
+
+                "load",
+
+                init,
+
+                {
+                    once:true
+                }
+
+            );
+
+
+        }
+
 
     }
 
-    //---------------------------------
+
+
+
+
+    // =============================================
     // Fullscreen
-    //---------------------------------
+    // =============================================
 
     fullscreen() {
 
-        if (!this.window)
+
+        if (
+            !this.window ||
+            this.window.closed
+        )
             return;
 
-        const doc = this.window.document;
 
-        const el = doc.documentElement;
 
-        if (el.requestFullscreen)
-            el.requestFullscreen();
+        const element =
+            this.window.document
+                .documentElement;
+
+
+
+        if (
+            element.requestFullscreen
+        ) {
+
+
+            element.requestFullscreen();
+
+
+        }
+
 
     }
 
-    //---------------------------------
+
+
+
+
+    // =============================================
     // Black Screen
-    //---------------------------------
+    // =============================================
 
     black(enable = true) {
 
-        if (!this.window)
+
+        if (
+            !this.window ||
+            this.window.closed
+        )
             return;
 
+
+
         const black =
-            this.window.document.getElementById("black");
+            this.window.document
+                .getElementById(
+                    "black"
+                );
+
+
+
+        if (!black)
+            return;
+
+
 
         black.style.display =
-            enable ? "block" : "none";
+
+            enable
+
+                ? "block"
+
+                : "none";
+
 
     }
-
-    //---------------------------------
-    // Close
-    //---------------------------------
+    // =============================================
+    // Close Output Window
+    // =============================================
 
     close() {
 
+
         if (!this.window)
             return;
 
+
+
+        this.player.detachOutput();
+
+
+
         this.window.close();
+
+
 
         this.window = null;
 
+
+
         this.video = null;
+
 
     }
 
-    //---------------------------------
-    // Is Open
-    //---------------------------------
+
+
+
+
+    // =============================================
+    // Check State
+    // =============================================
 
     isOpen() {
 
-        return this.window &&
-               !this.window.closed;
+
+        return !!(
+
+            this.window &&
+
+            !this.window.closed
+
+        );
+
 
     }
+
 
 }

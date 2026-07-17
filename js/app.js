@@ -43,6 +43,7 @@ class StageCue {
 
 
 
+
     init(){
 
 
@@ -52,8 +53,8 @@ class StageCue {
 
 
 
-        // Wait until layout is ready
         requestAnimationFrame(() => {
+
 
 
             this.player =
@@ -161,7 +162,7 @@ class StageCue {
                 .getElementById(
                     "loadPlaylist"
                 )
-                .click();
+                ?.click();
 
 
             };
@@ -184,72 +185,119 @@ class StageCue {
 
 
 
-        document
-        .getElementById(
-            "savePlaylist"
-        )
-        .onclick = () => {
+        const saveButton =
+            document.getElementById(
+                "savePlaylist"
+            );
 
 
-            this.storage.save();
+        if(saveButton){
 
 
-        };
+            saveButton.onclick = () => {
 
 
+                this.storage.save();
 
 
-
-        document
-        .getElementById(
-            "loadPlaylist"
-        )
-        .onclick = () => {
+            };
 
 
-            const input =
-                document.createElement(
-                    "input"
-                );
-
-
-            input.type =
-                "file";
-
-
-            input.accept =
-                ".json,.stagecue.json";
+        }
 
 
 
-            input.onchange = e => {
 
 
-                const file =
-                    e.target.files[0];
+        const loadButton =
+            document.getElementById(
+                "loadPlaylist"
+            );
 
 
-                if(!file)
-                    return;
+        if(loadButton){
 
 
-
-                const reader =
-                    new FileReader();
+            loadButton.onclick = () => {
 
 
 
-                reader.onload = () => {
+                const input =
+                    document.createElement(
+                        "input"
+                    );
 
 
-                    const json =
-                        JSON.parse(
-                            reader.result
-                        );
+                input.type =
+                    "file";
 
 
-                    this.storage.load(
-                        json
+                input.accept =
+                    ".json,.stagecue.json";
+
+
+
+                input.onchange = e => {
+
+
+
+                    const file =
+                        e.target.files[0];
+
+
+                    if(!file)
+                        return;
+
+
+
+                    const reader =
+                        new FileReader();
+
+
+
+                    reader.onload = () => {
+
+
+                        try {
+
+
+                            const json =
+                                JSON.parse(
+                                    reader.result
+                                );
+
+
+                            this.storage.load(
+                                json
+                            );
+
+
+                        }
+
+
+                        catch(err){
+
+
+                            console.error(
+                                "Load error:",
+                                err
+                            );
+
+
+                            alert(
+                                "Invalid StageCue project file"
+                            );
+
+
+                        }
+
+
+                    };
+
+
+
+                    reader.readAsText(
+                        file
                     );
 
 
@@ -257,94 +305,116 @@ class StageCue {
 
 
 
-                reader.readAsText(
-                    file
-                );
+                input.click();
+
+
+            };
+
+
+        }
+
+
+
+
+
+        const openFiles =
+            document.getElementById(
+                "openFiles"
+            );
+
+
+        const filePicker =
+            document.getElementById(
+                "filePicker"
+            );
+
+
+
+        if(openFiles && filePicker){
+
+
+            openFiles.onclick = () => {
+
+
+                filePicker.click();
 
 
             };
 
 
 
-            input.click();
 
 
-        };
+            filePicker.addEventListener(
+
+                "change",
+
+                e => {
 
 
+                    this.playlist.addFiles(
+
+                        [
+                            ...e.target.files
+                        ]
+
+                    );
 
 
+                }
 
-        document
-        .getElementById(
-            "openFiles"
-        )
-        .onclick = () => {
+            );
 
 
-            document
-            .getElementById(
-                "filePicker"
-            )
-            .click();
-
-
-        };
-
-
-
-
-
-        document
-        .getElementById(
-            "filePicker"
-        )
-        .addEventListener(
-            "change",
-            e => {
-
-
-                this.playlist.addFiles(
-                    [
-                        ...e.target.files
-                    ]
-                );
-
-
-            }
-        );
+        }
 
 
 
 
 
-        document
-        .getElementById(
-            "outputWindow"
-        )
-        .onclick = () => {
+        const outputButton =
+            document.getElementById(
+                "outputWindow"
+            );
 
 
-            this.output.open();
+        if(outputButton){
 
 
-        };
+            outputButton.onclick = () => {
+
+
+                this.output.open();
+
+
+            };
+
+
+        }
 
 
 
 
 
-        document
-        .getElementById(
-            "fullscreen"
-        )
-        .onclick = () => {
+        const fullscreen =
+            document.getElementById(
+                "fullscreen"
+            );
 
 
-            this.output.fullscreen();
+        if(fullscreen){
 
 
-        };
+            fullscreen.onclick = () => {
+
+
+                this.output.fullscreen();
+
+
+            };
+
+
+        }
 
 
     }
@@ -361,104 +431,137 @@ class StageCue {
 
 
 
-        document
-        .getElementById(
-            "play"
-        )
-        .onclick = () => {
+        const play =
+            document.getElementById(
+                "play"
+            );
 
 
-            this.player.play();
+        if(play){
 
+            play.onclick = () => {
 
-        };
+                this.player.play();
 
+            };
 
-
-
-
-        document
-        .getElementById(
-            "pause"
-        )
-        .onclick = () => {
-
-
-            this.player.pause();
-
-
-        };
+        }
 
 
 
 
 
-        document
-        .getElementById(
-            "stop"
-        )
-        .onclick = () => {
+        const pause =
+            document.getElementById(
+                "pause"
+            );
 
 
-            this.player.stop();
+        if(pause){
 
+            pause.onclick = () => {
 
-        };
+                this.player.pause();
 
+            };
 
-
-
-
-        document
-        .getElementById(
-            "next"
-        )
-        .onclick = () => {
-
-
-            this.playlist.next();
-
-
-        };
+        }
 
 
 
 
 
-        document
-        .getElementById(
-            "previous"
-        )
-        .onclick = () => {
+        const stop =
+            document.getElementById(
+                "stop"
+            );
 
 
-            this.playlist.previous();
+        if(stop){
+
+            stop.onclick = () => {
+
+                this.player.stop();
+
+            };
+
+        }
 
 
-        };
+
+
+
+        const next =
+            document.getElementById(
+                "next"
+            );
+
+
+        if(next){
+
+            next.onclick = () => {
+
+                this.playlist.next();
+
+            };
+
+        }
 
 
 
 
 
-        document
-        .getElementById(
-            "volume"
-        )
-        .addEventListener(
-            "input",
-            e => {
+        const previous =
+            document.getElementById(
+                "previous"
+            );
 
 
-                this.player.setVolume(
-                    Number(
-                        e.target.value
-                    )
-                );
+        if(previous){
+
+            previous.onclick = () => {
+
+                this.playlist.previous();
+
+            };
+
+        }
 
 
-            }
-        );
+
+
+
+        const volume =
+            document.getElementById(
+                "volume"
+            );
+
+
+        if(volume){
+
+
+            volume.addEventListener(
+
+                "input",
+
+                e => {
+
+
+                    this.player.setVolume(
+
+                        Number(
+                            e.target.value
+                        )
+
+                    );
+
+
+                }
+
+            );
+
+
+        }
 
 
     }
@@ -471,7 +574,9 @@ class StageCue {
 
 
 window.addEventListener(
+
     "DOMContentLoaded",
+
     () => {
 
 
@@ -483,4 +588,5 @@ window.addEventListener(
 
 
     }
+
 );
