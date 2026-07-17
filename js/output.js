@@ -156,14 +156,6 @@ video {
 
 <div id="black"></div>
 
-
-<div id="live">
-
-LIVE OUTPUT
-
-</div>
-
-
 <video
 
 autoplay
