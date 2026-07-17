@@ -396,25 +396,7 @@ class StageCue {
 
 
 
-        const fullscreen =
-            document.getElementById(
-                "fullscreen"
-            );
-
-
-        if(fullscreen){
-
-
-            fullscreen.onclick = () => {
-
-
-                this.output.fullscreen();
-
-
-            };
-
-
-        }
+        
 
 
     }
