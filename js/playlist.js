@@ -7,26 +7,22 @@ import { UI } from "./ui.js";
 
 export class Playlist {
 
-    formatDuration(seconds){
+    formatDuration(seconds) {
 
-    if(isNaN(seconds))
-        return "--:--";
+        if (isNaN(seconds))
+            return "--:--";
 
-    const h=Math.floor(seconds/3600);
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = Math.floor(seconds % 60);
 
-    const m=Math.floor((seconds%3600)/60);
+        if (h) {
+            return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+        }
 
-    const s=Math.floor(seconds%60);
-
-    if(h){
-
-        return `${h}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+        return `${m}:${String(s).padStart(2, "0")}`;
 
     }
-
-    return `${m}:${String(s).padStart(2,"0")}`;
-
-}
 
     constructor(player) {
 
@@ -38,14 +34,11 @@ export class Playlist {
 
         this.currentIndex = -1;
 
-        this.container =
-            document.getElementById("playlist");
+        this.container = document.getElementById("playlist");
 
-        this.counter =
-            document.getElementById("playlistCount");
+        this.counter = document.getElementById("playlistCount");
 
-        this.loop =
-            document.getElementById("loopPlaylist");
+        this.loop = document.getElementById("loopPlaylist");
 
         this.bindEvents();
 
@@ -66,58 +59,58 @@ export class Playlist {
 
     async addFiles(files) {
 
-    for (const file of files) {
+        for (const file of files) {
 
-        if (!file.type.startsWith("video/")) {
-            continue;
+            if (!file.type.startsWith("video/"))
+                continue;
+
+            const clip = {
+
+                id: crypto.randomUUID(),
+
+                type: "video",
+
+                name: file.name,
+
+                file,
+
+                // Player creates blob URLs when needed
+                url: null,
+
+                thumbnail: null,
+
+                duration: null
+
+            };
+
+            this.items.push(clip);
+
+            try {
+
+                const result = await generateThumbnail(file);
+
+                clip.thumbnail = result.thumbnail;
+
+                clip.duration = this.formatDuration(result.duration);
+
+            }
+            catch (err) {
+
+                console.error(err);
+
+            }
+
         }
 
-        const clip = {
+        this.ui.render();
 
-            id: crypto.randomUUID(),
+        if (this.currentIndex === -1 && this.items.length) {
 
-            type: "video",
-
-            name: file.name,
-
-            file,
-
-            url: URL.createObjectURL(file),
-
-            thumbnail: null,
-
-            duration: null
-
-        };
-
-        this.items.push(clip);
-
-        try {
-
-            const result = await generateThumbnail(file);
-
-            clip.thumbnail = result.thumbnail;
-
-            clip.duration = this.formatDuration(result.duration);
-
-        }
-        catch (err) {
-
-            console.error(err);
+            this.select(0);
 
         }
 
     }
-
-    this.ui.render();
-
-    if (this.currentIndex === -1 && this.items.length) {
-
-        this.select(0);
-
-    }
-
-}
 
     //-----------------------------------
     // Select clip
@@ -131,11 +124,10 @@ export class Playlist {
 
         this.currentIndex = index;
 
-        const clip = this.items[index];
-
-        this.player.load(clip);
+        this.player.load(this.items[index]);
 
         this.ui.render();
+
     }
 
     //-----------------------------------
@@ -206,16 +198,16 @@ export class Playlist {
 
         if (index >= this.items.length) return;
 
-        URL.revokeObjectURL(
-            this.items[index].url
-        );
+        // Player owns blob URLs now.
+        // Nothing to revoke here.
 
-        this.items.splice(index,1);
+        this.items.splice(index, 1);
 
         if (this.currentIndex >= this.items.length)
-            this.currentIndex = this.items.length-1;
+            this.currentIndex = this.items.length - 1;
 
         this.ui.render();
+
     }
 
     //-----------------------------------
@@ -224,15 +216,12 @@ export class Playlist {
 
     clear() {
 
-        this.items.forEach(item => {
+        // Player owns blob URLs.
+        // Just remove playlist items.
 
-            URL.revokeObjectURL(item.url);
+        this.items = [];
 
-        });
-
-        this.items=[];
-
-        this.currentIndex=-1;
+        this.currentIndex = -1;
 
         this.ui.render();
 
@@ -244,130 +233,116 @@ export class Playlist {
 
     render() {
 
-        this.counter.textContent =
-            this.items.length;
+        this.counter.textContent = this.items.length;
 
-        this.container.innerHTML="";
+        this.container.innerHTML = "";
 
-        if(this.items.length===0){
+        if (this.items.length === 0) {
 
-            this.container.innerHTML=`
-
-            <div class="emptyPlaylist">
-
-                Drop videos here
-
-            </div>
-
+            this.container.innerHTML = `
+                <div class="emptyPlaylist">
+                    Drop videos here
+                </div>
             `;
 
             return;
 
         }
 
-        this.items.forEach((clip,index)=>{
+        this.items.forEach((clip, index) => {
 
-            const div=document.createElement("div");
+            const div = document.createElement("div");
 
             div.draggable = true;
             div.dataset.index = index;
 
-            div.className="playlist-item";
+            div.className = "playlist-item";
 
-            if(index===this.currentIndex){
-
+            if (index === this.currentIndex) {
                 div.classList.add("active");
-
             }
 
-            div.innerHTML=`
-
-<div class="thumb">
-
-${
-clip.thumbnail
-?
-
-`<img src="${clip.thumbnail}">`
-
-:
-
-""
-
-}
-
-</div>
-            <div class="info">
-
-                <div class="title">
-
-                    ${clip.name}
-
+            div.innerHTML = `
+                <div class="thumb">
+                    ${clip.thumbnail ? `<img src="${clip.thumbnail}">` : ""}
                 </div>
 
-                <div class="meta">
+                <div class="info">
+                    <div class="title">
+                        ${clip.name}
+                    </div>
 
-                   ${clip.duration ?? "Generating thumbnail..."}
-
+                    <div class="meta">
+                        ${clip.duration ?? "Generating thumbnail..."}
+                    </div>
                 </div>
-
-            </div>
-
             `;
 
-            div.addEventListener("dblclick",()=>{
-
-                this.play(index);
-
+            div.addEventListener("click", () => {
+                this.select(index);
             });
 
-            div.addEventListener("click",()=>{
-
-                this.select(index);
-
+            div.addEventListener("dblclick", () => {
+                this.play(index);
             });
 
             div.addEventListener("dragstart", e => {
 
-    e.dataTransfer.setData(
-        "text/plain",
-        index
-    );
+                e.dataTransfer.setData(
+                    "text/plain",
+                    index
+                );
 
-});
+            });
 
-div.addEventListener("dragover", e => {
+            div.addEventListener("dragover", e => {
 
-    e.preventDefault();
+                e.preventDefault();
 
-});
+            });
 
-div.addEventListener("drop", e => {
+            div.addEventListener("drop", e => {
 
-    e.preventDefault();
+                e.preventDefault();
 
-    const from = Number(
-        e.dataTransfer.getData("text/plain")
-    );
+                const from = Number(
+                    e.dataTransfer.getData("text/plain")
+                );
 
-    const to = index;
+                const to = index;
 
-    if (from === to)
-        return;
+                if (from === to)
+                    return;
 
-    const clip = this.items.splice(from,1)[0];
+                const clip = this.items.splice(from, 1)[0];
 
-    this.items.splice(to,0,clip);
+                this.items.splice(to, 0, clip);
 
-    if(this.currentIndex===from){
+                if (this.currentIndex === from) {
 
-        this.currentIndex=to;
+                    this.currentIndex = to;
 
-    }
+                }
+                else if (
+                    from < this.currentIndex &&
+                    to >= this.currentIndex
+                ) {
 
-    this.ui.render();
+                    this.currentIndex--;
 
-});
+                }
+                else if (
+                    from > this.currentIndex &&
+                    to <= this.currentIndex
+                ) {
+
+                    this.currentIndex++;
+
+                }
+
+                this.ui.render();
+
+            });
 
             this.container.appendChild(div);
 
