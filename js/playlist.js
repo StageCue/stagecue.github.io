@@ -5,44 +5,64 @@
 import { generateThumbnail } from "./thumbnails.js";
 import { UI } from "./ui.js";
 
+
 export class Playlist {
+
+
+    constructor(player) {
+
+        this.player = player;
+
+        this.ui = new UI(this);
+
+        this.items = [];
+
+        this.currentIndex = -1;
+
+        this.container =
+            document.getElementById("playlist");
+
+        this.counter =
+            document.getElementById("playlistCount");
+
+        this.loop =
+            document.getElementById("loopPlaylist");
+
+
+        this.bindEvents();
+
+    }
+
+
 
     formatDuration(seconds) {
 
         if (isNaN(seconds))
             return "--:--";
 
-        const h = Math.floor(seconds / 3600);
-        const m = Math.floor((seconds % 3600) / 60);
-        const s = Math.floor(seconds % 60);
+
+        const h =
+            Math.floor(seconds / 3600);
+
+        const m =
+            Math.floor((seconds % 3600) / 60);
+
+        const s =
+            Math.floor(seconds % 60);
+
 
         if (h) {
-            return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+
+            return `${h}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+
         }
 
-        return `${m}:${String(s).padStart(2, "0")}`;
+
+        return `${m}:${String(s).padStart(2,"0")}`;
 
     }
 
-    constructor(player) {
 
-        this.ui = new UI(this);
-
-        this.player = player;
-
-        this.items = [];
-
-        this.currentIndex = -1;
-
-        this.container = document.getElementById("playlist");
-
-        this.counter = document.getElementById("playlistCount");
-
-        this.loop = document.getElementById("loopPlaylist");
-
-        this.bindEvents();
-
-    }
 
     bindEvents() {
 
@@ -53,301 +73,315 @@ export class Playlist {
 
     }
 
+
+
     //-----------------------------------
     // Add files
     //-----------------------------------
 
     async addFiles(files) {
 
+
         for (const file of files) {
 
-            if (!file.type.startsWith("video/"))
+
+            if (
+                !file.type.startsWith("video/")
+            )
                 continue;
+
+
 
             const clip = {
 
-                id: crypto.randomUUID(),
 
-                type: "video",
+                id:
+                    crypto.randomUUID(),
 
-                name: file.name,
+
+                type:
+                    "video",
+
+
+                name:
+                    file.name,
+
 
                 file,
 
-                // Player creates blob URLs when needed
-                url: null,
 
-                thumbnail: null,
+                url:
+                    null,
 
-                duration: null
+
+                thumbnail:
+                    null,
+
+
+                duration:
+                    null,
+
+
+                durationLabel:
+                    "--:--"
+
 
             };
 
+
+
             this.items.push(clip);
+
+
+
+            // Update UI immediately
+
+            this.ui.render();
+
+
+
+            // Generate thumbnail later
 
             try {
 
-                const result = await generateThumbnail(file);
 
-                clip.thumbnail = result.thumbnail;
+                const result =
+                    await generateThumbnail(file);
 
-                clip.duration = this.formatDuration(result.duration);
+
+
+                clip.thumbnail =
+                    result.thumbnail;
+
+
+                clip.duration =
+                    result.duration;
+
+
+                clip.durationLabel =
+                    this.formatDuration(
+                        result.duration
+                    );
+
+
+                this.ui.render();
+
 
             }
-            catch (err) {
+            catch(error){
 
-                console.error(err);
+                console.error(
+                    "Thumbnail error:",
+                    error
+                );
 
             }
 
         }
 
-        this.ui.render();
 
-        if (this.currentIndex === -1 && this.items.length) {
+
+        if (
+            this.currentIndex === -1 &&
+            this.items.length
+        ){
 
             this.select(0);
 
         }
 
+
     }
 
+
+
     //-----------------------------------
-    // Select clip
+    // Select
     //-----------------------------------
 
-    select(index) {
+    select(index){
 
-        if (index < 0) return;
 
-        if (index >= this.items.length) return;
+        if(index < 0)
+            return;
 
-        this.currentIndex = index;
 
-        this.player.load(this.items[index]);
+        if(index >= this.items.length)
+            return;
+
+
+
+        this.currentIndex =
+            index;
+
+
+        this.player.load(
+            this.items[index]
+        );
+
 
         this.ui.render();
 
+
     }
 
+
+
+
     //-----------------------------------
-    // Play selected clip
+    // Play
     //-----------------------------------
 
-    play(index) {
+    play(index){
 
-        if (typeof index === "number") {
+
+        if(typeof index === "number"){
 
             this.select(index);
 
         }
 
+
         this.player.play();
 
     }
+
+
+
 
     //-----------------------------------
     // Next
     //-----------------------------------
 
-    next() {
+    next(){
 
-        if (!this.items.length)
+
+        if(!this.items.length)
             return;
 
-        let next = this.currentIndex + 1;
 
-        if (next >= this.items.length) {
 
-            if (this.loop.checked)
+        let next =
+            this.currentIndex + 1;
+
+
+
+        if(next >= this.items.length){
+
+
+            if(this.loop?.checked){
+
                 next = 0;
-            else
+
+            }
+            else{
+
                 return;
+
+            }
 
         }
 
+
+
         this.play(next);
 
+
     }
+
+
+
 
     //-----------------------------------
     // Previous
     //-----------------------------------
 
-    previous() {
+    previous(){
 
-        if (!this.items.length)
+
+        if(!this.items.length)
             return;
 
-        let previous = this.currentIndex - 1;
 
-        if (previous < 0)
+
+        let previous =
+            this.currentIndex - 1;
+
+
+
+        if(previous < 0)
             previous = 0;
+
+
 
         this.play(previous);
 
+
     }
 
+
+
+
     //-----------------------------------
-    // Remove clip
+    // Remove
     //-----------------------------------
 
-    remove(index) {
+    remove(index){
 
-        if (index < 0) return;
 
-        if (index >= this.items.length) return;
+        if(index < 0)
+            return;
 
-        // Player owns blob URLs now.
-        // Nothing to revoke here.
 
-        this.items.splice(index, 1);
+        if(index >= this.items.length)
+            return;
 
-        if (this.currentIndex >= this.items.length)
-            this.currentIndex = this.items.length - 1;
+
+
+        this.items.splice(
+            index,
+            1
+        );
+
+
+
+        if(
+            this.currentIndex >=
+            this.items.length
+        ){
+
+            this.currentIndex =
+                this.items.length - 1;
+
+        }
+
+
 
         this.ui.render();
 
+
     }
+
+
+
 
     //-----------------------------------
     // Clear
     //-----------------------------------
 
-    clear() {
+    clear(){
 
-        // Player owns blob URLs.
-        // Just remove playlist items.
 
         this.items = [];
 
         this.currentIndex = -1;
 
+
         this.ui.render();
 
-    }
-
-    //-----------------------------------
-    // Render
-    //-----------------------------------
-
-    render() {
-
-        this.counter.textContent = this.items.length;
-
-        this.container.innerHTML = "";
-
-        if (this.items.length === 0) {
-
-            this.container.innerHTML = `
-                <div class="emptyPlaylist">
-                    Drop videos here
-                </div>
-            `;
-
-            return;
-
-        }
-
-        this.items.forEach((clip, index) => {
-
-            const div = document.createElement("div");
-
-            div.draggable = true;
-            div.dataset.index = index;
-
-            div.className = "playlist-item";
-
-            if (index === this.currentIndex) {
-                div.classList.add("active");
-            }
-
-            div.innerHTML = `
-                <div class="thumb">
-                    ${clip.thumbnail ? `<img src="${clip.thumbnail}">` : ""}
-                </div>
-
-                <div class="info">
-                    <div class="title">
-                        ${clip.name}
-                    </div>
-
-                    <div class="meta">
-                        ${clip.duration ?? "Generating thumbnail..."}
-                    </div>
-                </div>
-            `;
-
-            div.addEventListener("click", () => {
-                this.select(index);
-            });
-
-            div.addEventListener("dblclick", () => {
-                this.play(index);
-            });
-
-            div.addEventListener("dragstart", e => {
-
-                e.dataTransfer.setData(
-                    "text/plain",
-                    index
-                );
-
-            });
-
-            div.addEventListener("dragover", e => {
-
-                e.preventDefault();
-
-            });
-
-            div.addEventListener("drop", e => {
-
-                e.preventDefault();
-
-                const from = Number(
-                    e.dataTransfer.getData("text/plain")
-                );
-
-                const to = index;
-
-                if (from === to)
-                    return;
-
-                const clip = this.items.splice(from, 1)[0];
-
-                this.items.splice(to, 0, clip);
-
-                if (this.currentIndex === from) {
-
-                    this.currentIndex = to;
-
-                }
-                else if (
-                    from < this.currentIndex &&
-                    to >= this.currentIndex
-                ) {
-
-                    this.currentIndex--;
-
-                }
-                else if (
-                    from > this.currentIndex &&
-                    to <= this.currentIndex
-                ) {
-
-                    this.currentIndex++;
-
-                }
-
-                this.ui.render();
-
-            });
-
-            this.container.appendChild(div);
-
-        });
 
     }
+
+
 
 }
