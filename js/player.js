@@ -89,7 +89,15 @@ export class Player {
 
     bindEvents() {
 
+this.video.addEventListener(
+    "ratechange",
+    () => this.syncOutput()
+);
 
+this.video.addEventListener(
+    "volumechange",
+    () => this.syncOutput()
+);
 
         this.video.addEventListener(
             "loadedmetadata",
@@ -302,7 +310,12 @@ export class Player {
 
 
         this.video.load();
+if (this.output) {
 
+    this.output.src = this.video.currentSrc || this.video.src;
+    this.output.load();
+
+}
 
 
     }
@@ -628,54 +641,59 @@ export class Player {
     // Output Window
     // =====================================================
 
-    syncOutput() {
+   syncOutput() {
 
+    if (!this.output)
+        return;
 
-        if (!this.output)
-            return;
+    // Keep times synchronized
+    if (Math.abs(this.output.currentTime - this.video.currentTime) > 0.15) {
 
-
-
-        this.output.currentTime =
-            this.video.currentTime;
-
-
-
-        if (this.video.paused) {
-
-
-            this.output.pause();
-
-
-        }
-
-        else {
-
-
-            this.output.play()
-                .catch(()=>{});
-
-
-        }
-
+        this.output.currentTime = this.video.currentTime;
 
     }
 
+    this.output.playbackRate = this.video.playbackRate;
+    this.output.volume = this.video.volume;
+    this.output.muted = this.video.muted;
+
+    if (this.video.paused) {
+
+        this.output.pause();
+
+    } else {
+
+        this.output.play().catch(() => {});
+
+    }
+
+}
 
 
 
 
     attachOutput(videoElement) {
 
+    this.output = videoElement;
 
-        this.output =
-            videoElement;
+    if (!this.output)
+        return;
 
+    // Copy the current video source
+    this.output.src = this.video.currentSrc || this.video.src;
 
-        this.syncOutput();
+    this.output.currentTime = this.video.currentTime;
+    this.output.volume = this.video.volume;
+    this.output.playbackRate = this.video.playbackRate;
+    this.output.muted = this.video.muted;
 
+    if (!this.video.paused) {
+
+        this.output.play().catch(console.warn);
 
     }
+
+}
 
 
 
