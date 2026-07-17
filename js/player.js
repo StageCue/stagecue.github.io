@@ -1,87 +1,89 @@
-   // ==============================================
+// ==============================================
 // StageCue Player Engine
 // ==============================================
 
-import Timeline from "./timeline/timeline.js";
+import Timeline from "./timeline.js";
 
+import * as Media from "./player-media.js";
+import * as Playback from "./player-playback.js";
+import * as Output from "./player-output.js";
 
 export class Player {
 
-
     constructor() {
 
+        //-----------------------------------------
+        // Preview Video
+        //-----------------------------------------
 
-        // Preview video
         this.video =
             document.getElementById("preview");
 
+        //-----------------------------------------
+        // Timeline
+        //-----------------------------------------
 
-        // Timeline root
         this.timelineRoot =
             document.getElementById("timeline");
 
+        this.timeline = null;
 
+        //-----------------------------------------
         // UI
+        //-----------------------------------------
+
         this.seek =
             document.getElementById("seek");
-
 
         this.currentLabel =
             document.getElementById("current");
 
-
         this.durationLabel =
             document.getElementById("duration");
-
 
         this.overlay =
             document.getElementById("previewOverlay");
 
-
-
+        //-----------------------------------------
         // Data
-        this.currentClip = null;
+        //-----------------------------------------
 
+        this.currentClip = null;
 
         this.videoURL = null;
 
+        //-----------------------------------------
+        // External Output
+        //-----------------------------------------
 
-        // External output
         this.output = null;
 
-
+        //-----------------------------------------
         // Timeline
-        this.timeline = null;
-
-
+        //-----------------------------------------
 
         if (this.timelineRoot) {
-
 
             this.timeline =
                 new Timeline({
 
-                    root:this.timelineRoot,
+                    root: this.timelineRoot,
 
-                    video:this.video,
+                    video: this.video,
 
-                    fps:30
+                    fps: 30
 
                 });
 
-
         }
 
-
+        //-----------------------------------------
+        // Events
+        //-----------------------------------------
 
         this.bindEvents();
 
-
     }
-
-
-
-
 
     // =====================================================
     // Events
@@ -89,533 +91,193 @@ export class Player {
 
     bindEvents() {
 
-this.video.addEventListener(
-    "ratechange",
-    () => this.syncOutput()
-);
-
-this.video.addEventListener(
-    "volumechange",
-    () => this.syncOutput()
-);
+        //-----------------------------------------
+        // Metadata
+        //-----------------------------------------
 
         this.video.addEventListener(
+
             "loadedmetadata",
+
             async () => {
 
-
                 this.updateDuration();
-
-
 
                 if (
                     this.timeline &&
                     this.currentClip
                 ) {
 
-
                     try {
 
-
                         const source =
-                            this.currentClip.file
-                            ||
+                            this.currentClip.file ||
                             this.currentClip.url;
-
-
-                        const isVideoSource =
-                            (
-                                source instanceof Blob &&
-                                source.type?.startsWith("video/")
-                            )
-                            ||
-                            (
-                                typeof source === "string" &&
-                                source.startsWith("blob:")
-                            );
-
 
                         await this.timeline.load(source);
 
-
                     }
 
-
-                    catch(err) {
-
+                    catch (err) {
 
                         console.error(
                             "Timeline error:",
                             err
                         );
 
-
                     }
-
 
                 }
 
+                Output.syncOutput(this);
 
             }
+
         );
 
-
-
-
+        //-----------------------------------------
+        // Time
+        //-----------------------------------------
 
         this.video.addEventListener(
+
             "timeupdate",
-            () => this.updateTime()
-        );
 
-
-
-        this.video.addEventListener(
-            "play",
-            () => this.syncOutput()
-        );
-
-
-        this.video.addEventListener(
-            "pause",
-            () => this.syncOutput()
-        );
-
-
-        this.video.addEventListener(
-            "seeked",
-            () => this.syncOutput()
-        );
-
-
-
-
-
-        this.seek.addEventListener(
-            "input",
             () => {
 
+                this.updateTime();
+
+            }
+
+        );
+
+        //-----------------------------------------
+        // Playback
+        //-----------------------------------------
+
+        this.video.addEventListener(
+
+            "play",
+
+            () => Output.syncOutput(this)
+
+        );
+
+        this.video.addEventListener(
+
+            "pause",
+
+            () => Output.syncOutput(this)
+
+        );
+
+        this.video.addEventListener(
+
+            "seeked",
+
+            () => Output.syncOutput(this)
+
+        );
+
+        this.video.addEventListener(
+
+            "volumechange",
+
+            () => Output.syncOutput(this)
+
+        );
+
+        this.video.addEventListener(
+
+            "ratechange",
+
+            () => Output.syncOutput(this)
+
+        );
+
+        //-----------------------------------------
+        // Seek Bar
+        //-----------------------------------------
+
+        this.seek.addEventListener(
+
+            "input",
+
+            () => {
 
                 if (!this.video.duration)
                     return;
 
+                Playback.seekTo(
 
-
-                this.seekTo(
+                    this,
 
                     (
-                        this.seek.value /
-                        100
-                    )
-                    *
-                    this.video.duration
+                        this.seek.value / 100
+                    ) * this.video.duration
 
                 );
-
 
             }
+
         );
 
-
-
     }
-
-
-
-
-
-
-
-    // =====================================================
-    // Media
-    // =====================================================
-
-    load(clip) {
-
-
-        if (!clip)
-            return;
-
-
-
-        this.stop();
-
-
-
-        this.currentClip =
-            clip;
-
-
-
-        //--------------------------------
-        // Release old blob
-        //--------------------------------
-
-        if (this.videoURL) {
-
-
-            URL.revokeObjectURL(
-                this.videoURL
-            );
-
-
-            this.videoURL = null;
-
-        }
-
-
-
-
-
-        //--------------------------------
-        // Local File
-        //--------------------------------
-
-        if (clip.file) {
-
-
-            this.videoURL =
-                URL.createObjectURL(
-                    clip.file
-                );
-
-
-            this.video.src =
-                this.videoURL;
-
-
-        }
-
-
-
-        //--------------------------------
-        // URL
-        //--------------------------------
-
-        else {
-
-
-            this.video.src =
-                clip.url;
-
-
-        }
-
-
-
-
-        this.overlay.style.display =
-            "none";
-
-
-
-        this.video.load();
-if (this.output) {
-
-    this.output.src = this.video.currentSrc || this.video.src;
-    this.output.load();
-
-}
-
-
-    }
-
-
-
-
-
-
-    unload() {
-
-
-        this.stop();
-
-
-
-        this.video.removeAttribute(
-            "src"
-        );
-
-
-        this.video.load();
-
-
-
-        if (this.videoURL) {
-
-
-            URL.revokeObjectURL(
-                this.videoURL
-            );
-
-
-            this.videoURL = null;
-
-
-        }
-
-
-
-        this.currentClip =
-            null;
-
-
-
-        if (this.timeline) {
-
-
-            this.timeline.waveform.clear();
-
-
-            this.timeline.clearMarkers();
-
-
-            this.timeline.clearSelection();
-
-
-        }
-
-
-    }
-
-
-
-
-
-
-
-    // =====================================================
-    // Playback
-    // =====================================================
-
-    async play() {
-
-
-        try {
-
-
-            await this.video.play();
-
-
-        }
-
-
-        catch(err) {
-
-
-            console.warn(err);
-
-
-        }
-
-
-    }
-
-
-
-    pause() {
-
-
-        this.video.pause();
-
-
-    }
-
-
-
-    stop() {
-
-
-        this.video.pause();
-
-
-        this.video.currentTime =
-            0;
-
-
-
-        if (this.output) {
-
-
-            this.output.pause();
-
-
-            this.output.currentTime =
-                0;
-
-
-        }
-
-
-    }
-
-
-
-
-    toggle() {
-
-
-        if (this.video.paused)
-
-            this.play();
-
-        else
-
-            this.pause();
-
-
-    }
-
-
-
-
-
-
-
-    // =====================================================
-    // Volume
-    // =====================================================
-
-    setVolume(value) {
-
-
-        this.video.volume =
-            value;
-
-
-    }
-
-
-
-
-
-
-
-    // =====================================================
-    // Seek
-    // =====================================================
-
-    seekTo(seconds) {
-
-
-        if (!this.video.duration)
-            return;
-
-
-
-        this.video.currentTime =
-            Math.max(
-
-                0,
-
-                Math.min(
-
-                    seconds,
-
-                    this.video.duration
-
-                )
-
-            );
-
-
-    }
-
-
-
-
-
-
-
-    // =====================================================
+       // =====================================================
     // UI
     // =====================================================
 
     updateTime() {
-
 
         this.currentLabel.textContent =
             this.format(
                 this.video.currentTime
             );
 
-
-
         if (this.video.duration) {
-
 
             this.seek.value =
 
                 (
                     this.video.currentTime /
                     this.video.duration
-                )
-                *
-                100;
-
+                ) * 100;
 
         }
-
-
-
-        if (this.output) {
-
-
-            this.output.currentTime =
-                this.video.currentTime;
-
-
-        }
-
 
     }
-
-
-
 
     updateDuration() {
 
-
         this.durationLabel.textContent =
-            this.format(
-                this.video.duration
-            );
 
+            this.format(
+
+                this.video.duration
+
+            );
 
     }
 
-
-
-
-
-
-
     format(seconds) {
-
 
         if (isNaN(seconds))
             return "00:00";
-
-
 
         const m =
             Math.floor(
                 seconds / 60
             );
 
-
-
         const s =
             Math.floor(
                 seconds % 60
             );
 
-
-
         return (
 
             String(m)
-                .padStart(2,"0")
+                .padStart(2, "0")
 
             +
 
@@ -624,92 +286,123 @@ if (this.output) {
             +
 
             String(s)
-                .padStart(2,"0")
+                .padStart(2, "0")
 
         );
 
-
     }
-
-
-
-
-
-
 
     // =====================================================
-    // Output Window
+    // Media
     // =====================================================
 
-   syncOutput() {
+    load(clip) {
 
-    if (!this.output)
-        return;
-
-    // Keep times synchronized
-    if (Math.abs(this.output.currentTime - this.video.currentTime) > 0.15) {
-
-        this.output.currentTime = this.video.currentTime;
+        Media.load(this, clip);
 
     }
 
-    this.output.playbackRate = this.video.playbackRate;
-    this.output.volume = this.video.volume;
-    this.output.muted = this.video.muted;
+    unload() {
 
-    if (this.video.paused) {
-
-        this.output.pause();
-
-    } else {
-
-        this.output.play().catch(() => {});
+        Media.unload(this);
 
     }
-
-}
-
-
-
-
-    attachOutput(videoElement) {
-
-    this.output = videoElement;
-
-    if (!this.output)
-        return;
-
-    // Copy the current video source
-    this.output.src = this.video.currentSrc || this.video.src;
-
-    this.output.currentTime = this.video.currentTime;
-    this.output.volume = this.video.volume;
-    this.output.playbackRate = this.video.playbackRate;
-    this.output.muted = this.video.muted;
-
-    if (!this.video.paused) {
-
-        this.output.play().catch(console.warn);
-
-    }
-
-}
-
-
-
-
-
-
 
     // =====================================================
+    // Playback
+    // =====================================================
+
+    play() {
+
+        return Playback.play(this);
+
+    }
+
+    pause() {
+
+        Playback.pause(this);
+
+    }
+
+    stop() {
+
+        Playback.stop(this);
+
+    }
+
+    toggle() {
+
+        Playback.toggle(this);
+
+    }
+
+    setVolume(value) {
+
+        Playback.setVolume(
+
+            this,
+
+            value
+
+        );
+
+    }
+
+    seekTo(seconds) {
+
+        Playback.seekTo(
+
+            this,
+
+            seconds
+
+        );
+
+    }
+
+    // =====================================================
+    // Output
+    // =====================================================
+
+    attachOutput(video) {
+
+        Output.attachOutput(
+
+            this,
+
+            video
+
+        );
+
+    }
+
+    syncOutput() {
+
+        Output.syncOutput(
+
+            this
+
+        );
+
+    }
+
+    detachOutput() {
+
+        Output.detachOutput(
+
+            this
+
+        );
+
+    }
+       // =====================================================
     // Timeline API
     // =====================================================
 
     addCue(
-        name="Cue",
-        color="#ff9800"
+        name = "Cue",
+        color = "#ff9800"
     ) {
-
 
         return this.timeline?.addMarker(
 
@@ -721,44 +414,25 @@ if (this.output) {
 
         );
 
-
     }
-
-
 
     zoomIn() {
 
-
         this.timeline?.zoomIn();
 
-
     }
-
-
 
     zoomOut() {
 
-
         this.timeline?.zoomOut();
 
-
     }
-
-
 
     fitTimeline() {
 
-
         this.timeline?.fit();
 
-
     }
-
-
-
-
-
-
 
     // =====================================================
     // Getters
@@ -766,37 +440,21 @@ if (this.output) {
 
     get currentTime() {
 
-
         return this.video.currentTime;
 
-
     }
-
-
 
     get duration() {
 
-
         return this.video.duration || 0;
 
-
     }
-
-
 
     get paused() {
 
-
         return this.video.paused;
 
-
     }
-
-
-
-
-
-
 
     // =====================================================
     // Cleanup
@@ -804,31 +462,13 @@ if (this.output) {
 
     destroy() {
 
-
-
         this.timeline?.destroy();
 
+        Media.unload(this);
 
-
-        if (this.videoURL) {
-
-
-            URL.revokeObjectURL(
-                this.videoURL
-            );
-
-
-        }
-
-
-
-        this.stop();
-
+        Output.detachOutput(this);
 
     }
+   }
 
-
-}
-    
-
-
+ 
