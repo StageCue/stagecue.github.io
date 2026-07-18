@@ -15,7 +15,7 @@ export class Player {
     constructor() {
 
         //-----------------------------------------
-        // Video
+        // Preview Video
         //-----------------------------------------
 
         this.video =
@@ -47,7 +47,7 @@ export class Player {
             document.getElementById("previewOverlay");
 
         //-----------------------------------------
-        // Data
+        // Current Media
         //-----------------------------------------
 
         this.currentClip = null;
@@ -57,13 +57,13 @@ export class Player {
         this.videoURL = null;
 
         //-----------------------------------------
-        // Output
+        // Output Windows
         //-----------------------------------------
 
-        this.output = null;
+        this.outputs = [];
 
         //-----------------------------------------
-        // Init
+        // Initialize
         //-----------------------------------------
 
         Timeline.create(this);
@@ -95,7 +95,7 @@ export class Player {
     }
 
     //==================================================
-    // Cue
+    // Current Cue
     //==================================================
 
     setCurrentCue(cue) {
@@ -188,15 +188,25 @@ export class Player {
 
     }
 
-    syncOutput() {
+    detachOutput(video = null) {
 
-        Output.syncOutput(this);
+        Output.detachOutput(
+
+            this,
+
+            video
+
+        );
 
     }
 
-    detachOutput() {
+    syncOutput() {
 
-        Output.detachOutput(this);
+        Output.syncOutput(
+
+            this
+
+        );
 
     }
 
