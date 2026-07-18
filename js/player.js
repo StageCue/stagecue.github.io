@@ -2,19 +2,20 @@
 // StageCue Player Engine
 // ==============================================
 
-import Timeline from "./timeline/timeline.js";
-
-
+import * as Events from "./player-events.js";
+import * as UI from "./player-ui.js";
 import * as Media from "./player-media.js";
 import * as Playback from "./player-playback.js";
 import * as Output from "./player-output.js";
+
+import Timeline from "./timeline/timeline.js";
 
 export class Player {
 
     constructor() {
 
         //-----------------------------------------
-        // Preview Video
+        // Preview
         //-----------------------------------------
 
         this.video =
@@ -51,10 +52,12 @@ export class Player {
 
         this.currentClip = null;
 
+        this.currentCue = null;
+
         this.videoURL = null;
 
         //-----------------------------------------
-        // External Output
+        // Output
         //-----------------------------------------
 
         this.output = null;
@@ -82,220 +85,45 @@ export class Player {
         // Events
         //-----------------------------------------
 
-        this.bindEvents();
+        Events.bind(this);
 
     }
 
-    // =====================================================
-    // Events
-    // =====================================================
-
-    bindEvents() {
-
-        //-----------------------------------------
-        // Metadata
-        //-----------------------------------------
-
-        this.video.addEventListener(
-
-            "loadedmetadata",
-
-            async () => {
-
-                this.updateDuration();
-
-                if (
-                    this.timeline &&
-                    this.currentClip
-                ) {
-
-                    try {
-
-                        const source =
-                            this.currentClip.file ||
-                            this.currentClip.url;
-
-                        await this.timeline.load(source);
-
-                    }
-
-                    catch (err) {
-
-                        console.error(
-                            "Timeline error:",
-                            err
-                        );
-
-                    }
-
-                }
-
-                Output.syncOutput(this);
-
-            }
-
-        );
-
-        //-----------------------------------------
-        // Time
-        //-----------------------------------------
-
-        this.video.addEventListener(
-
-            "timeupdate",
-
-            () => {
-
-                this.updateTime();
-
-            }
-
-        );
-
-        //-----------------------------------------
-        // Playback
-        //-----------------------------------------
-
-        this.video.addEventListener(
-
-            "play",
-
-            () => Output.syncOutput(this)
-
-        );
-
-        this.video.addEventListener(
-
-            "pause",
-
-            () => Output.syncOutput(this)
-
-        );
-
-        this.video.addEventListener(
-
-            "seeked",
-
-            () => Output.syncOutput(this)
-
-        );
-
-        this.video.addEventListener(
-
-            "volumechange",
-
-            () => Output.syncOutput(this)
-
-        );
-
-        this.video.addEventListener(
-
-            "ratechange",
-
-            () => Output.syncOutput(this)
-
-        );
-
-        //-----------------------------------------
-        // Seek Bar
-        //-----------------------------------------
-
-        this.seek.addEventListener(
-
-            "input",
-
-            () => {
-
-                if (!this.video.duration)
-                    return;
-
-                Playback.seekTo(
-
-                    this,
-
-                    (
-                        this.seek.value / 100
-                    ) * this.video.duration
-
-                );
-
-            }
-
-        );
-
-    }
-       // =====================================================
+    //==================================================
     // UI
-    // =====================================================
+    //==================================================
 
     updateTime() {
 
-        this.currentLabel.textContent =
-            this.format(
-                this.video.currentTime
-            );
-
-        if (this.video.duration) {
-
-            this.seek.value =
-
-                (
-                    this.video.currentTime /
-                    this.video.duration
-                ) * 100;
-
-        }
+        UI.updateTime(this);
 
     }
 
     updateDuration() {
 
-        this.durationLabel.textContent =
-
-            this.format(
-
-                this.video.duration
-
-            );
+        UI.updateDuration(this);
 
     }
 
     format(seconds) {
 
-        if (isNaN(seconds))
-            return "00:00";
-
-        const m =
-            Math.floor(
-                seconds / 60
-            );
-
-        const s =
-            Math.floor(
-                seconds % 60
-            );
-
-        return (
-
-            String(m)
-                .padStart(2, "0")
-
-            +
-
-            ":"
-
-            +
-
-            String(s)
-                .padStart(2, "0")
-
-        );
+        return UI.format(seconds);
 
     }
 
-    // =====================================================
+    //==================================================
+    // Current Cue
+    //==================================================
+
+    setCurrentCue(cue) {
+
+        this.currentCue = cue;
+
+    }
+
+    //==================================================
     // Media
-    // =====================================================
+    //==================================================
 
     load(clip) {
 
@@ -309,9 +137,9 @@ export class Player {
 
     }
 
-    // =====================================================
+    //==================================================
     // Playback
-    // =====================================================
+    //==================================================
 
     play() {
 
@@ -337,18 +165,6 @@ export class Player {
 
     }
 
-    setVolume(value) {
-
-        Playback.setVolume(
-
-            this,
-
-            value
-
-        );
-
-    }
-
     seekTo(seconds) {
 
         Playback.seekTo(
@@ -361,9 +177,21 @@ export class Player {
 
     }
 
-    // =====================================================
+    setVolume(value) {
+
+        Playback.setVolume(
+
+            this,
+
+            value
+
+        );
+
+    }
+
+    //==================================================
     // Output
-    // =====================================================
+    //==================================================
 
     attachOutput(video) {
 
@@ -396,13 +224,17 @@ export class Player {
         );
 
     }
-       // =====================================================
-    // Timeline API
-    // =====================================================
+
+    //==================================================
+    // Timeline
+    //==================================================
 
     addCue(
+
         name = "Cue",
+
         color = "#ff9800"
+
     ) {
 
         return this.timeline?.addMarker(
@@ -435,9 +267,9 @@ export class Player {
 
     }
 
-    // =====================================================
+    //==================================================
     // Getters
-    // =====================================================
+    //==================================================
 
     get currentTime() {
 
@@ -457,9 +289,9 @@ export class Player {
 
     }
 
-    // =====================================================
+    //==================================================
     // Cleanup
-    // =====================================================
+    //==================================================
 
     destroy() {
 
@@ -470,6 +302,5 @@ export class Player {
         Output.detachOutput(this);
 
     }
-   }
 
- 
+}
