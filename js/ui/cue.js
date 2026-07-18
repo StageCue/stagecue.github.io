@@ -8,6 +8,7 @@ import { createCueControls } from "./cue-controls.js";
 import { bindCueEvents } from "./cue-events.js";
 import { enableCueDrag } from "./cue-drag.js";
 import { CueMenu } from "./cue-menu.js";
+import { CueStatus } from "./cue-status.js";
 
 export class Cue {
 
@@ -19,20 +20,28 @@ export class Cue {
         this.clip = clip;
         this.index = index;
 
-        // Root element
+        //----------------------------------
+        // Default values
+        //----------------------------------
+
+        this.clip.expanded ??= false;
+
+        //----------------------------------
+        // Root
+        //----------------------------------
 
         this.element = document.createElement("div");
 
         this.element.className = "playlist-item";
+
+        this.element.draggable = true;
+        this.element.dataset.index = index;
 
         if (index === playlist.currentIndex) {
 
             this.element.classList.add("active");
 
         }
-
-        this.element.draggable = true;
-        this.element.dataset.index = index;
 
         //----------------------------------
         // Header
@@ -46,6 +55,17 @@ export class Cue {
         );
 
         //----------------------------------
+        // Status
+        //----------------------------------
+
+        this.status =
+            new CueStatus(this);
+
+        this.element.appendChild(
+            this.status.element
+        );
+
+        //----------------------------------
         // Controls
         //----------------------------------
 
@@ -56,15 +76,17 @@ export class Cue {
             this.controls
         );
 
-        if (!clip.expanded) {
+        //----------------------------------
+        // Expanded
+        //----------------------------------
 
-            this.controls.hidden = true;
+        this.controls.hidden =
+            !this.clip.expanded;
 
-        } else {
-
-            this.element.classList.add("expanded");
-
-        }
+        this.element.classList.toggle(
+            "expanded",
+            this.clip.expanded
+        );
 
         //----------------------------------
         // Events
@@ -102,7 +124,7 @@ export class Cue {
     }
 
     //----------------------------------
-    // Expand / Collapse
+    // Expand
     //----------------------------------
 
     toggle() {
@@ -130,7 +152,17 @@ export class Cue {
     }
 
     //----------------------------------
-    // Select Cue
+    // Activate
+    //----------------------------------
+
+    activate() {
+
+        this.player.setCurrentCue(this);
+
+    }
+
+    //----------------------------------
+    // Select
     //----------------------------------
 
     select() {
@@ -139,22 +171,44 @@ export class Cue {
             this.index
         );
 
+        this.activate();
+
     }
 
     //----------------------------------
-    // Play Cue
+    // Play
     //----------------------------------
 
     play() {
 
-        this.playlist.play(
-            this.index
-        );
+        this.select();
+
+        this.player.play();
 
     }
 
     //----------------------------------
-    // Preview Cue
+    // Pause
+    //----------------------------------
+
+    pause() {
+
+        this.player.pause();
+
+    }
+
+    //----------------------------------
+    // Stop
+    //----------------------------------
+
+    stop() {
+
+        this.player.stop();
+
+    }
+
+    //----------------------------------
+    // Preview
     //----------------------------------
 
     preview() {
@@ -166,7 +220,7 @@ export class Cue {
     }
 
     //----------------------------------
-    // Remove Cue
+    // Remove
     //----------------------------------
 
     remove() {
@@ -174,6 +228,16 @@ export class Cue {
         this.playlist.remove(
             this.index
         );
+
+    }
+
+    //----------------------------------
+    // Refresh
+    //----------------------------------
+
+    refresh() {
+
+        this.status.refresh();
 
     }
 
