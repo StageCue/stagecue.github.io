@@ -7,6 +7,7 @@ import { createCueHeader } from "./cue-header.js";
 import { createCueControls } from "./cue-controls.js";
 import { bindCueEvents } from "./cue-events.js";
 import { enableCueDrag } from "./cue-drag.js";
+import { CueMenu } from "./cue-menu.js";
 
 export class Cue {
 
@@ -18,11 +19,11 @@ export class Cue {
         this.clip = clip;
         this.index = index;
 
-        this.element =
-            document.createElement("div");
+        // Root element
 
-        this.element.className =
-            "playlist-item";
+        this.element = document.createElement("div");
+
+        this.element.className = "playlist-item";
 
         if (index === playlist.currentIndex) {
 
@@ -31,12 +32,11 @@ export class Cue {
         }
 
         this.element.draggable = true;
-
         this.element.dataset.index = index;
 
-        // -----------------------------
+        //----------------------------------
         // Header
-        // -----------------------------
+        //----------------------------------
 
         this.header =
             createCueHeader(this);
@@ -45,9 +45,9 @@ export class Cue {
             this.header
         );
 
-        // -----------------------------
+        //----------------------------------
         // Controls
-        // -----------------------------
+        //----------------------------------
 
         this.controls =
             createCueControls(this);
@@ -56,25 +56,48 @@ export class Cue {
             this.controls
         );
 
-        // Hide controls until expanded
-
         if (!clip.expanded) {
 
             this.controls.hidden = true;
 
+        } else {
+
+            this.element.classList.add("expanded");
+
         }
 
-        // -----------------------------
+        //----------------------------------
         // Events
-        // -----------------------------
+        //----------------------------------
 
         bindCueEvents(this);
 
-        // -----------------------------
+        //----------------------------------
         // Drag & Drop
-        // -----------------------------
+        //----------------------------------
 
         enableCueDrag(this);
+
+        //----------------------------------
+        // Context Menu
+        //----------------------------------
+
+        this.menu =
+            new CueMenu(this);
+
+        this.element.addEventListener(
+            "contextmenu",
+            e => {
+
+                e.preventDefault();
+
+                this.menu.show(
+                    e.clientX,
+                    e.clientY
+                );
+
+            }
+        );
 
     }
 
@@ -95,10 +118,19 @@ export class Cue {
             this.clip.expanded
         );
 
+        if (this.expandButton) {
+
+            this.expandButton.textContent =
+                this.clip.expanded
+                    ? "▲"
+                    : "▼";
+
+        }
+
     }
 
     //----------------------------------
-    // Select
+    // Select Cue
     //----------------------------------
 
     select() {
@@ -110,7 +142,7 @@ export class Cue {
     }
 
     //----------------------------------
-    // Play
+    // Play Cue
     //----------------------------------
 
     play() {
@@ -122,7 +154,19 @@ export class Cue {
     }
 
     //----------------------------------
-    // Remove
+    // Preview Cue
+    //----------------------------------
+
+    preview() {
+
+        this.select();
+
+        this.player.play();
+
+    }
+
+    //----------------------------------
+    // Remove Cue
     //----------------------------------
 
     remove() {
