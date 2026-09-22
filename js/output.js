@@ -1,6 +1,6 @@
- // ==============================================
-// StageCue Output Window
-// External Monitor Output
+// ==============================================
+// StageCue
+// Output Window
 // ==============================================
 
 export class OutputWindow {
@@ -13,15 +13,16 @@ export class OutputWindow {
 
         this.video = null;
 
+        this.settings = {
+            zoom: 100,
+            crop: 0,
+            offsetX: 0,
+            offsetY: 0
+        };
+
     }
 
-
-    // =============================================
-    // Open Output Window
-    // =============================================
-
     open() {
-
 
         if (
             this.window &&
@@ -29,40 +30,27 @@ export class OutputWindow {
         ) {
 
             this.window.focus();
-
             return;
 
         }
 
-
         this.window = window.open(
-
             "",
-
             "StageCueOutput",
-
             "popup,width=1280,height=720"
-
         );
-
 
         if (!this.window)
             return;
 
-
-
         this.window.document.write(`
 
 <!DOCTYPE html>
-
 <html>
-
 <head>
-
 <title>
 StageCue Output
 </title>
-
 
 <style>
 
@@ -83,7 +71,6 @@ body {
 
 }
 
-
 video {
 
     width:100vw;
@@ -94,9 +81,9 @@ video {
 
     background:black;
 
+    transform-origin:center center;
+
 }
-
-
 
 #black {
 
@@ -118,41 +105,11 @@ video {
 
 }
 
-
-
-#live {
-
-    position:fixed;
-
-    top:20px;
-
-    right:20px;
-
-    background:#d82f2f;
-
-    color:white;
-
-    padding:8px 14px;
-
-    font-family:Segoe UI, sans-serif;
-
-    border-radius:20px;
-
-    font-size:12px;
-
-    opacity:.75;
-
-}
-
-
 </style>
-
 
 </head>
 
-
 <body>
-
 
 <div id="black"></div>
 
@@ -166,29 +123,45 @@ playsinline
 
 </video>
 
-
 </body>
 
 </html>
 
         `);
 
-
         this.window.document.close();
-
 
         this.initVideo();
 
     }
-    // =============================================
-    // Initialize Output Video
-    // =============================================
+
+    applyVideoAdjustments() {
+
+        if (!this.video)
+            return;
+
+        const crop = this.settings.crop / 100;
+        const scale = this.settings.zoom / 100;
+
+        this.video.style.objectFit = "contain";
+        this.video.style.transform = `scale(${scale})`;
+        this.video.style.objectPosition = `${this.settings.offsetX}% ${this.settings.offsetY}%`;
+        this.video.style.clipPath = `inset(${crop * 50}% ${crop * 50}% ${crop * 50}% ${crop * 50}%)`;
+
+        if (this.player.output) {
+
+            this.player.output.style.objectFit = this.video.style.objectFit;
+            this.player.output.style.transform = this.video.style.transform;
+            this.player.output.style.objectPosition = this.video.style.objectPosition;
+            this.player.output.style.clipPath = this.video.style.clipPath;
+
+        }
+
+    }
 
     initVideo() {
 
-
         const init = () => {
-
 
             if (
                 !this.window ||
@@ -196,135 +169,94 @@ playsinline
             )
                 return;
 
-
-
             this.video =
                 this.window.document
                     .querySelector("video");
 
-
-
             if (!this.video)
                 return;
 
-
-
-            // Connect Player
-            this.player.attachOutput(
-                this.video
-            );
-
-
-
-            // Cleanup if popup closes
+            this.player.attachOutput(this.video);
+            this.applyVideoAdjustments();
 
             this.window.addEventListener(
-
                 "beforeunload",
 
                 () => {
-
                     this.player.detachOutput();
-
                     this.video = null;
-
                 }
-
             );
 
-
         };
-
-
 
         if (
             this.window.document.readyState ===
             "complete"
         ) {
 
-
             init();
 
-
         }
-
         else {
 
-
             this.window.addEventListener(
-
                 "load",
-
                 init,
-
-                {
-                    once:true
-                }
-
+                {once:true}
             );
 
-
         }
-
 
     }
 
+    setAdjustment(key, value) {
 
+        this.settings[key] = value;
+        this.applyVideoAdjustments();
 
+    }
 
+    resetAdjustments() {
 
-    // =============================================
-    // Fullscreen
-    // =============================================
+        this.settings = {
+            zoom: 100,
+            crop: 0,
+            offsetX: 0,
+            offsetY: 0
+        };
+
+        this.applyVideoAdjustments();
+
+    }
 
     fullscreen() {
-
 
         if (
             !this.window ||
             this.window.closed
         )
             return;
-
-
 
         const element =
             this.window.document
                 .documentElement;
 
-
-
         if (
             element.requestFullscreen
         ) {
-
-
             element.requestFullscreen();
-
-
         }
-
 
     }
 
-
-
-
-
-    // =============================================
-    // Black Screen
-    // =============================================
-
     black(enable = true) {
-
 
         if (
             !this.window ||
             this.window.closed
         )
             return;
-
-
 
         const black =
             this.window.document
@@ -332,73 +264,35 @@ playsinline
                     "black"
                 );
 
-
-
         if (!black)
             return;
 
-
-
         black.style.display =
-
             enable
-
                 ? "block"
-
                 : "none";
 
-
     }
-    // =============================================
-    // Close Output Window
-    // =============================================
 
     close() {
-
 
         if (!this.window)
             return;
 
-
-
         this.player.detachOutput();
-
-
-
         this.window.close();
-
-
-
         this.window = null;
-
-
-
         this.video = null;
 
-
     }
-
-
-
-
-
-    // =============================================
-    // Check State
-    // =============================================
 
     isOpen() {
 
-
         return !!(
-
             this.window &&
-
             !this.window.closed
-
         );
 
-
     }
-
 
 }

@@ -61,6 +61,35 @@
 
 }
 
+.playlist-item__controls{
+
+    display:flex;
+    align-items:center;
+    gap:6px;
+    margin-left:auto;
+
+}
+
+.playlist-item__controls button{
+
+    min-width:28px;
+    height:28px;
+    padding:0 8px;
+    border-radius:6px;
+    border:1px solid #3b3b3b;
+    background:#202020;
+    color:#eee;
+    font-size:12px;
+    cursor:pointer;
+
+}
+
+.playlist-item__controls button:hover{
+
+    background:#2e2e2e;
+
+}
+
 /* Thumbnail */
 
 .thumb{
@@ -300,6 +329,61 @@ input[type=range]{
 .contextMenu div:hover{
 
     background:#3a3a3a;
+
+}
+
+.output-adjustments{
+
+    display:grid;
+    gap:10px;
+    padding:10px 12px 12px;
+    border-top:1px solid #2b2b2b;
+    background:#1a1a1a;
+
+}
+
+.output-adjustments__header{
+
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    color:#b7b7b7;
+    opacity:.8;
+
+}
+
+.output-adjustments__group{
+
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+
+}
+
+.output-adjustments__group label{
+
+    display:grid;
+    gap:6px;
+    color:#d8d8d8;
+    font-size:12px;
+
+}
+
+.output-adjustments__group input[type="range"]{
+
+    width:100%;
+
+}
+
+.output-adjustments__actions{
+
+    grid-template-columns:1fr;
+
+}
+
+.output-adjustments__actions button{
+
+    width:100%;
 
 }
 

@@ -65,6 +65,7 @@ Output
 
 
 
+
 </div>
 
 
@@ -106,6 +107,7 @@ Playlist
 
 
 </aside>
+
 
 
 
@@ -185,6 +187,7 @@ Tracks: 0
 
 
 
+
 <!-- RULER -->
 
 <div class="timeline-ruler">
@@ -194,6 +197,7 @@ Tracks: 0
 
 
 </div>
+
 
 
 
@@ -213,6 +217,7 @@ Tracks: 0
 
 
 
+
 <!-- AUDIO VISUALIZER -->
 
 <div class="timeline-spectrum">
@@ -225,7 +230,10 @@ Tracks: 0
 
 
 
+
+
 </div>
+
 
 
 
@@ -234,7 +242,6 @@ Tracks: 0
 
 
 </main>
-
 
 
 
@@ -253,7 +260,7 @@ Tracks: 0
 
 <button id="previous">
 ⏮
-</button>
+a</button>
 
 
 <button id="play">
@@ -273,7 +280,7 @@ Tracks: 0
 
 <button id="next">
 ⏭
-</button>
+a</button>
 
 
 </div>
@@ -286,6 +293,7 @@ Tracks: 0
 
 
 🔊
+a
 
 
 <input
@@ -302,26 +310,53 @@ value="1">
 
 
 
-
 <label>
-
 
 <input
 type="checkbox"
 id="loopPlaylist">
 
-
 Loop Playlist
 
-
 </label>
-
-
 
 
 </footer>
 
 
+<section id="outputAdjustments" class="output-adjustments" aria-label="Output adjustments">
+    <div class="output-adjustments__header">
+        Output
+    </div>
+
+    <div class="output-adjustments__group">
+        <label>
+            Crop
+            <input id="outputCrop" type="range" min="0" max="100" value="0">
+        </label>
+
+        <label>
+            Zoom
+            <input id="outputZoom" type="range" min="80" max="200" value="100">
+        </label>
+    </div>
+
+    <div class="output-adjustments__group">
+        <label>
+            Offset X
+            <input id="outputOffsetX" type="range" min="-50" max="50" value="0">
+        </label>
+
+        <label>
+            Offset Y
+            <input id="outputOffsetY" type="range" min="-50" max="50" value="0">
+        </label>
+    </div>
+
+    <div class="output-adjustments__group output-adjustments__actions">
+        <button id="outputReset" type="button">Reset</button>
+    </div>
+</section>
 
 
 
@@ -336,7 +371,6 @@ id="filePicker"
 accept="video/*"
 multiple
 hidden>
-
 
 
 

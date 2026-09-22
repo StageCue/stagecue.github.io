@@ -227,7 +227,6 @@ export class Playlist {
 
 
 
-
     //-----------------------------------
     // Play
     //-----------------------------------
@@ -246,6 +245,39 @@ export class Playlist {
 
     }
 
+
+    move(index, direction) {
+
+        if(index < 0)
+            return;
+
+        if(index >= this.items.length)
+            return;
+
+        const target = index + direction;
+
+        if(target < 0 || target >= this.items.length)
+            return;
+
+        const [item] = this.items.splice(index, 1);
+
+        this.items.splice(target, 0, item);
+
+        if(this.currentIndex === index){
+
+            this.currentIndex = target;
+
+        }
+        else if(this.currentIndex >= 0){
+
+            const delta = target > index ? 1 : -1;
+            this.currentIndex += delta;
+
+        }
+
+        this.ui.render();
+
+    }
 
 
 
@@ -291,7 +323,6 @@ export class Playlist {
 
 
 
-
     //-----------------------------------
     // Previous
     //-----------------------------------
@@ -318,7 +349,6 @@ export class Playlist {
 
 
     }
-
 
 
 
@@ -361,7 +391,6 @@ export class Playlist {
 
 
     }
-
 
 
 

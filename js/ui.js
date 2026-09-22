@@ -88,6 +88,13 @@ export class UI {
 
         </div>
 
+        <div class="playlist-item__controls">
+            <button data-action="up" title="Move up">↑</button>
+            <button data-action="down" title="Move down">↓</button>
+            <button data-action="play" title="Play">▶</button>
+            <button data-action="remove" title="Remove">✕</button>
+        </div>
+
         `;
 
         this.bindItemEvents(item, index);
@@ -98,7 +105,43 @@ export class UI {
 
     bindItemEvents(item, index) {
 
-        item.onclick = () => {
+        item.onclick = (e) => {
+
+            const actionEl = e.target.closest("[data-action]");
+
+            if (actionEl) {
+
+                const action = actionEl.dataset.action;
+
+                if (action === "play") {
+
+                    this.playlist.play(index);
+                    return;
+
+                }
+
+                if (action === "up") {
+
+                    this.playlist.move(index, -1);
+                    return;
+
+                }
+
+                if (action === "down") {
+
+                    this.playlist.move(index, 1);
+                    return;
+
+                }
+
+                if (action === "remove") {
+
+                    this.playlist.remove(index);
+                    return;
+
+                }
+
+            }
 
             this.playlist.select(index);
 
@@ -143,6 +186,14 @@ export class UI {
                 ▶ Play
             </div>
 
+            <div data-action="up">
+                ↑ Move Up
+            </div>
+
+            <div data-action="down">
+                ↓ Move Down
+            </div>
+
             <div data-action="remove">
                 🗑 Remove
             </div>
@@ -159,6 +210,18 @@ export class UI {
                 case "play":
 
                     this.playlist.play(index);
+
+                    break;
+
+                case "up":
+
+                    this.playlist.move(index, -1);
+
+                    break;
+
+                case "down":
+
+                    this.playlist.move(index, 1);
 
                     break;
 

@@ -42,8 +42,6 @@ class StageCue {
 
 
 
-
-
     init(){
 
 
@@ -89,6 +87,8 @@ class StageCue {
 
             this.bindTransport();
 
+            this.bindOutputControls();
+
 
             enableDragDrop(
                 this.playlist
@@ -106,6 +106,60 @@ class StageCue {
     }
 
 
+    bindOutputControls() {
+
+        const crop = document.getElementById("outputCrop");
+        const zoom = document.getElementById("outputZoom");
+        const offsetX = document.getElementById("outputOffsetX");
+        const offsetY = document.getElementById("outputOffsetY");
+        const reset = document.getElementById("outputReset");
+
+        if (crop) {
+
+            crop.addEventListener("input", e => {
+                this.output?.setAdjustment("crop", Number(e.target.value));
+            });
+
+        }
+
+        if (zoom) {
+
+            zoom.addEventListener("input", e => {
+                this.output?.setAdjustment("zoom", Number(e.target.value));
+            });
+
+        }
+
+        if (offsetX) {
+
+            offsetX.addEventListener("input", e => {
+                this.output?.setAdjustment("offsetX", Number(e.target.value));
+            });
+
+        }
+
+        if (offsetY) {
+
+            offsetY.addEventListener("input", e => {
+                this.output?.setAdjustment("offsetY", Number(e.target.value));
+            });
+
+        }
+
+        if (reset) {
+
+            reset.addEventListener("click", () => {
+                this.output?.resetAdjustments();
+
+                if (crop) crop.value = 0;
+                if (zoom) zoom.value = 100;
+                if (offsetX) offsetX.value = 0;
+                if (offsetY) offsetY.value = 0;
+            });
+
+        }
+
+    }
 
 
 
@@ -175,8 +229,6 @@ class StageCue {
 
 
 
-
-
     // =====================================================
     // Toolbar
     // =====================================================
@@ -204,8 +256,6 @@ class StageCue {
 
 
         }
-
-
 
 
 
@@ -315,8 +365,6 @@ class StageCue {
 
 
 
-
-
         const openFiles =
             document.getElementById(
                 "openFiles"
@@ -340,8 +388,6 @@ class StageCue {
 
 
             };
-
-
 
 
 
@@ -370,8 +416,6 @@ class StageCue {
 
 
 
-
-
         const outputButton =
             document.getElementById(
                 "outputWindow"
@@ -393,15 +437,7 @@ class StageCue {
         }
 
 
-
-
-
-        
-
-
     }
-
-
 
 
 
@@ -431,8 +467,6 @@ class StageCue {
 
 
 
-
-
         const pause =
             document.getElementById(
                 "pause"
@@ -448,8 +482,6 @@ class StageCue {
             };
 
         }
-
-
 
 
 
@@ -471,8 +503,6 @@ class StageCue {
 
 
 
-
-
         const next =
             document.getElementById(
                 "next"
@@ -491,8 +521,6 @@ class StageCue {
 
 
 
-
-
         const previous =
             document.getElementById(
                 "previous"
@@ -508,8 +536,6 @@ class StageCue {
             };
 
         }
-
-
 
 
 
@@ -550,8 +576,6 @@ class StageCue {
 
 
 }
-
-
 
 
 
