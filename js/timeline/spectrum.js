@@ -25,7 +25,7 @@ export default class Spectrum {
         this.barWidth = 3;
         this.barGap = 2;
         this.peaks = [];
-        this.peakFall = 0.018;
+        this.peakFall = 0.010;
         this.lastBass = 0;
         this.beatPulse = 0;
 
@@ -51,14 +51,12 @@ export default class Spectrum {
             this.source.connect(this.analyser);
             this.analyser.connect(this.context.destination);
         } catch (error) {
-            // A media element can only have one MediaElementSource. Keep the
-            // visualizer alive if another component already owns the source.
             console.warn("Spectrum source is already connected", error);
         }
 
         this.data = new Uint8Array(this.analyser.frequencyBinCount);
         this.wave = new Uint8Array(this.analyser.fftSize);
-        this.peaks = new Float32Array(this.data.length);
+        this.peaks = new Float32Array(Math.max(32, Math.floor(this.analyser.frequencyBinCount / 12)));
         this.connected = true;
     }
 
@@ -123,66 +121,105 @@ export default class Spectrum {
     }
 
     drawBars(ctx, width, height) {
-        const count = Math.max(1, Math.floor(width / (this.barWidth + this.barGap)));
-        const step = this.data.length / count;
         const center = height / 2;
-        const maxHeight = Math.max(4, center - 5);
-        const gradient = ctx.createLinearGradient(0, height, 0, 0);
-
-        gradient.addColorStop(0, "#18d6ff");
-        gradient.addColorStop(.52, "#4c8dff");
-        gradient.addColorStop(.82, "#b86cff");
-        gradient.addColorStop(1, "#ff5470");
+        const maxHeight = Math.max(8, center - 6);
+        const count = Math.max(24, Math.floor(width / (this.barWidth + this.barGap)));
+        const step = this.data.length / count;
 
         ctx.save();
-        ctx.shadowBlur = 7;
-        ctx.shadowColor = "rgba(51,155,255,.45)";
-        ctx.fillStyle = gradient;
+        ctx.lineWidth = 1;
 
         for (let i = 0; i < count; i++) {
             const start = Math.floor(i * step);
             const end = Math.max(start + 1, Math.floor((i + 1) * step));
-            let value = 0;
 
-            for (let j = start; j < end && j < this.data.length; j++)
-                value = Math.max(value, this.data[j] / 255);
+            let bandValue = 0;
+            let total = 0;
+            let weight = 0;
 
-            // Compress the quiet end of the spectrum like a DJ mixer meter.
-            const level = Math.pow(value, .72);
-            const barHeight = Math.max(1, level * maxHeight);
+            for (let j = start; j < end && j < this.data.length; j++) {
+                const value = this.data[j] / 255;
+                const weightFactor = 1 + Math.log2(j + 2);
+                total += value * weightFactor;
+                weight += weightFactor;
+            }
+
+            if (weight > 0)
+                bandValue = total / weight;
+
+            const level = Math.pow(Math.min(1, bandValue), 0.72);
+            const barHeight = Math.max(2, level * maxHeight);
             const x = i * (this.barWidth + this.barGap);
             const peak = this.peaks[i] || 0;
 
             this.peaks[i] = Math.max(level, peak - this.peakFall);
 
+            const color = this.getBandColor(i / count, level);
+            ctx.fillStyle = color;
+            ctx.shadowBlur = 10 + level * 14;
+            ctx.shadowColor = color;
             ctx.fillRect(x, center - barHeight, this.barWidth, barHeight);
             ctx.fillRect(x, center, this.barWidth, barHeight);
 
-            if (this.peaks[i] > .02) {
-                ctx.fillStyle = "#f7fbff";
+            if (this.peaks[i] > 0.04) {
+                ctx.fillStyle = "rgba(255,255,255,0.9)";
                 const peakY = center - this.peaks[i] * maxHeight;
+                const peakYb = center + this.peaks[i] * maxHeight;
                 ctx.fillRect(x, peakY, this.barWidth, 2);
-                ctx.fillRect(x, center + this.peaks[i] * maxHeight - 2, this.barWidth, 2);
-                ctx.fillStyle = gradient;
+                ctx.fillRect(x, peakYb, this.barWidth, 2);
             }
         }
 
         ctx.restore();
 
-        // A subtle center line gives the meter the familiar DJ-deck look.
         ctx.save();
-        ctx.strokeStyle = `rgba(255,255,255,${.16 + this.beatPulse * .22})`;
+        ctx.strokeStyle = `rgba(255,255,255,${0.16 + this.beatPulse * 0.18})`;
         ctx.beginPath();
-        ctx.moveTo(0, center + .5);
-        ctx.lineTo(width, center + .5);
+        ctx.moveTo(0, center + 0.5);
+        ctx.lineTo(width, center + 0.5);
         ctx.stroke();
         ctx.restore();
 
-        this.beatPulse *= .88;
+        this.beatPulse *= 0.88;
+    }
+
+    getBandColor(normalized, level) {
+        const low = ["#00f5d4", "#3dd9ff", "#81f4ff"];
+        const mid = ["#5aa9ff", "#5b82ff", "#7f7bff"];
+        const high = ["#d96af7", "#ff70b8", "#ff5c7a"];
+
+        if (normalized < 0.38)
+            return this.mixColors(low, level);
+        if (normalized < 0.72)
+            return this.mixColors(mid, level);
+        return this.mixColors(high, level);
+    }
+
+    mixColors(colors, level) {
+        const i = Math.min(colors.length - 1, Math.max(0, Math.floor(level * (colors.length - 1))));
+        const next = colors[Math.min(colors.length - 1, i + 1)] || colors[i];
+        const t = Math.min(1, Math.max(0, level * (colors.length - 1) - i));
+        return this.interpolateHex(colors[i], next, t);
+    }
+
+    interpolateHex(a, b, t) {
+        const ah = parseInt(a.slice(1), 16);
+        const bh = parseInt(b.slice(1), 16);
+        const ar = (ah >> 16) & 255;
+        const ag = (ah >> 8) & 255;
+        const ab = ah & 255;
+        const br = (bh >> 16) & 255;
+        const bg = (bh >> 8) & 255;
+        const bb = bh & 255;
+
+        const r = Math.round(ar + (br - ar) * t);
+        const g = Math.round(ag + (bg - ag) * t);
+        const b = Math.round(ab + (bb - ab) * t);
+        return `rgb(${r}, ${g}, ${b})`;
     }
 
     updateBeatEnergy() {
-        const bassBins = Math.max(1, Math.floor(this.data.length * .08));
+        const bassBins = Math.max(1, Math.floor(this.data.length * 0.08));
         let bass = 0;
 
         for (let i = 0; i < bassBins; i++)
@@ -190,10 +227,10 @@ export default class Spectrum {
 
         bass /= bassBins;
 
-        if (bass > .62 && bass > this.lastBass * 1.12)
-            this.beatPulse = Math.min(1, bass);
+        if (bass > 0.62 && bass > this.lastBass * 1.12)
+            this.beatPulse = Math.min(1, bass + 0.2);
 
-        this.lastBass = this.lastBass * .86 + bass * .14;
+        this.lastBass = this.lastBass * 0.86 + bass * 0.14;
     }
 
     drawWave(ctx, width, height) {

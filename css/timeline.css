@@ -68,14 +68,13 @@
 .timeline-scroll-thumb:active { cursor:grabbing; }
 .timeline-loading { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(20,20,20,.92); color:white; font-size:13px; letter-spacing:1px; z-index:500; }
 
-/* DJ-style live spectrum meter */
 .timeline-spectrum {
     height:72px;
     flex:0 0 72px;
     position:relative;
-    background:#0b0d12;
+    background:radial-gradient(circle at 50% 10%, rgba(33,62,105,.9), rgba(11,13,18,1) 45%);
     border-top:1px solid #27303d;
-    box-shadow:inset 0 8px 18px rgba(0,0,0,.22);
+    box-shadow:inset 0 8px 18px rgba(0,0,0,.22), inset 0 -8px 18px rgba(16,20,30,.75);
 }
 
 .timeline-spectrum::before {
@@ -90,7 +89,13 @@
     pointer-events:none;
 }
 
-.timeline-spectrum canvas { position:absolute; inset:0; width:100%; height:100%; }
+.timeline-spectrum canvas {
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    filter: drop-shadow(0 0 8px rgba(95,180,255,.45));
+}
 
 @media (max-width:900px){
     .timeline { height:145px; }
