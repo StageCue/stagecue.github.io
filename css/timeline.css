@@ -15,451 +15,96 @@
     --timeline-marker: #ffd43b;
     --timeline-grid: #303030;
     --timeline-text: #d8d8d8;
-
     --timeline-hover: rgba(255,255,255,.05);
 }
 
-/* ==========================================================
-   Container
-   ========================================================== */
-
 .timeline {
     position: relative;
-
     width: 100%;
     height: var(--timeline-height);
-
     display: flex;
     flex-direction: column;
-
     background: var(--timeline-bg);
-
     border-top: 1px solid var(--timeline-border);
     overflow: hidden;
-
     user-select: none;
 }
 
-/* ==========================================================
-   Toolbar
-   ========================================================== */
-
 .timeline-toolbar {
-
     height: 38px;
-
     display: flex;
     align-items: center;
     justify-content: space-between;
-
     padding: 0 12px;
-
     background: var(--timeline-panel);
-
     border-bottom: 1px solid var(--timeline-border);
 }
 
 .timeline-left,
-.timeline-right{
+.timeline-right { display:flex; align-items:center; gap:8px; }
+.timeline-btn { height:28px; min-width:28px; border:none; background:#343434; color:white; border-radius:6px; cursor:pointer; transition:.2s; }
+.timeline-btn:hover { background:#4a4a4a; }
+.timeline-btn:active { transform:scale(.95); }
+.timeline-time { font-size:13px; color:var(--timeline-text); font-family:Consolas,monospace; letter-spacing:.5px; }
 
-    display:flex;
-    align-items:center;
-    gap:8px;
-}
+.timeline-ruler { position:relative; height:24px; background:#202020; border-bottom:1px solid var(--timeline-border); overflow:hidden; }
+.timeline-ruler canvas { position:absolute; inset:0; width:100%; height:100%; }
+.timeline-waveform { position:relative; flex:1; background:#181818; cursor:pointer; overflow:hidden; }
+.timeline-waveform canvas { position:absolute; inset:0; width:100%; height:100%; }
+.timeline-grid { position:absolute; inset:0; pointer-events:none; background-image:repeating-linear-gradient(to right,transparent,transparent 99px,rgba(255,255,255,.04) 100px); }
 
-.timeline-btn{
+.timeline-marker { position:absolute; top:0; width:12px; height:12px; background:var(--timeline-marker); transform:translateX(-50%) rotate(45deg); cursor:pointer; z-index:20; transition:.15s; }
+.timeline-marker:hover { transform:translateX(-50%) rotate(45deg) scale(1.15); }
+.timeline-marker-label { position:absolute; top:16px; transform:translateX(-50%); font-size:11px; color:#ddd; white-space:nowrap; pointer-events:none; }
+.timeline-playhead { position:absolute; top:0; bottom:0; width:2px; background:var(--timeline-playhead); z-index:100; pointer-events:none; }
+.timeline-playhead::before { content:""; position:absolute; top:-1px; left:50%; width:14px; height:14px; background:var(--timeline-playhead); transform:translateX(-50%) rotate(45deg); border-radius:2px; }
+.timeline-selection { position:absolute; top:0; bottom:0; background:rgba(91,167,255,.20); border-left:2px solid #5ba7ff; border-right:2px solid #5ba7ff; pointer-events:none; }
+.timeline-hover-line { position:absolute; top:0; bottom:0; width:1px; background:rgba(255,255,255,.20); pointer-events:none; display:none; }
+.timeline-zoom { width:140px; }
+.timeline-zoom input { width:100%; }
+.timeline-scroll { height:10px; background:#1d1d1d; border-top:1px solid var(--timeline-border); position:relative; }
+.timeline-scroll-thumb { position:absolute; height:100%; width:30%; background:#555; border-radius:6px; cursor:grab; }
+.timeline-scroll-thumb:hover { background:#6a6a6a; }
+.timeline-scroll-thumb:active { cursor:grabbing; }
+.timeline-loading { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(20,20,20,.92); color:white; font-size:13px; letter-spacing:1px; z-index:500; }
 
-    height:28px;
-    min-width:28px;
-
-    border:none;
-
-    background:#343434;
-
-    color:white;
-
-    border-radius:6px;
-
-    cursor:pointer;
-
-    transition:.2s;
-}
-
-.timeline-btn:hover{
-
-    background:#4a4a4a;
-}
-
-.timeline-btn:active{
-
-    transform:scale(.95);
-}
-
-/* ==========================================================
-   Time
-   ========================================================== */
-
-.timeline-time{
-
-    font-size:13px;
-
-    color:var(--timeline-text);
-
-    font-family:Consolas, monospace;
-
-    letter-spacing:.5px;
-}
-
-/* ==========================================================
-   Ruler
-   ========================================================== */
-
-.timeline-ruler{
-
+.timeline-spectrum {
+    height:72px;
+    flex:0 0 72px;
     position:relative;
-
-    height:24px;
-
-    background:#202020;
-
-    border-bottom:1px solid var(--timeline-border);
-
-    overflow:hidden;
+    background:radial-gradient(circle at 50% 10%, rgba(33,62,105,.9), rgba(11,13,18,1) 45%);
+    border-top:1px solid #27303d;
+    box-shadow:inset 0 8px 18px rgba(0,0,0,.22), inset 0 -8px 18px rgba(16,20,30,.75);
 }
 
-.timeline-ruler canvas{
-
+.timeline-spectrum::before {
+    content:"LIVE AUDIO";
     position:absolute;
+    top:5px;
+    left:8px;
+    z-index:2;
+    color:rgba(190,210,235,.55);
+    font:9px/1 sans-serif;
+    letter-spacing:1.2px;
+    pointer-events:none;
+}
 
+.timeline-spectrum canvas {
+    position:absolute;
     inset:0;
-
     width:100%;
     height:100%;
+    filter: drop-shadow(0 0 8px rgba(95,180,255,.45));
 }
-
-/* ==========================================================
-   Waveform
-   ========================================================== */
-
-.timeline-waveform{
-
-    position:relative;
-
-    flex:1;
-
-    background:#181818;
-
-    cursor:pointer;
-
-    overflow:hidden;
-}
-
-.timeline-waveform canvas{
-
-    position:absolute;
-
-    inset:0;
-
-    width:100%;
-    height:100%;
-}
-
-/* ==========================================================
-   Grid
-   ========================================================== */
-
-.timeline-grid{
-
-    position:absolute;
-
-    inset:0;
-
-    pointer-events:none;
-
-    background-image:
-
-    repeating-linear-gradient(
-        to right,
-        transparent,
-        transparent 99px,
-        rgba(255,255,255,.04) 100px
-    );
-}
-
-/* ==========================================================
-   Cue markers
-   ========================================================== */
-
-.timeline-marker{
-
-    position:absolute;
-
-    top:0;
-
-    width:12px;
-    height:12px;
-
-    background:var(--timeline-marker);
-
-    transform:translateX(-50%) rotate(45deg);
-
-    cursor:pointer;
-
-    z-index:20;
-
-    transition:.15s;
-}
-
-.timeline-marker:hover{
-
-    transform:
-        translateX(-50%)
-        rotate(45deg)
-        scale(1.15);
-}
-
-.timeline-marker-label{
-
-    position:absolute;
-
-    top:16px;
-
-    transform:translateX(-50%);
-
-    font-size:11px;
-
-    color:#ddd;
-
-    white-space:nowrap;
-
-    pointer-events:none;
-}
-
-/* ==========================================================
-   Playhead
-   ========================================================== */
-
-.timeline-playhead{
-
-    position:absolute;
-
-    top:0;
-    bottom:0;
-
-    width:2px;
-
-    background:var(--timeline-playhead);
-
-    z-index:100;
-
-    pointer-events:none;
-}
-
-.timeline-playhead::before{
-
-    content:"";
-
-    position:absolute;
-
-    top:-1px;
-
-    left:50%;
-
-    width:14px;
-    height:14px;
-
-    background:var(--timeline-playhead);
-
-    transform:
-        translateX(-50%)
-        rotate(45deg);
-
-    border-radius:2px;
-}
-
-/* ==========================================================
-   Selection
-   ========================================================== */
-
-.timeline-selection{
-
-    position:absolute;
-
-    top:0;
-    bottom:0;
-
-    background:rgba(91,167,255,.20);
-
-    border-left:2px solid #5ba7ff;
-    border-right:2px solid #5ba7ff;
-
-    pointer-events:none;
-}
-
-/* ==========================================================
-   Hover Cursor
-   ========================================================== */
-
-.timeline-hover-line{
-
-    position:absolute;
-
-    top:0;
-    bottom:0;
-
-    width:1px;
-
-    background:rgba(255,255,255,.20);
-
-    pointer-events:none;
-
-    display:none;
-}
-
-/* ==========================================================
-   Zoom Slider
-   ========================================================== */
-
-.timeline-zoom{
-
-    width:140px;
-}
-
-.timeline-zoom input{
-
-    width:100%;
-}
-
-/* ==========================================================
-   Scrollbar
-   ========================================================== */
-
-.timeline-scroll{
-
-    height:10px;
-
-    background:#1d1d1d;
-
-    border-top:1px solid var(--timeline-border);
-
-    position:relative;
-}
-
-.timeline-scroll-thumb{
-
-    position:absolute;
-
-    height:100%;
-
-    width:30%;
-
-    background:#555;
-
-    border-radius:6px;
-
-    cursor:grab;
-}
-
-.timeline-scroll-thumb:hover{
-
-    background:#6a6a6a;
-}
-
-.timeline-scroll-thumb:active{
-
-    cursor:grabbing;
-}
-
-/* ==========================================================
-   Loading Waveform
-   ========================================================== */
-
-.timeline-loading{
-
-    position:absolute;
-
-    inset:0;
-
-    display:flex;
-
-    align-items:center;
-    justify-content:center;
-
-    background:rgba(20,20,20,.92);
-
-    color:white;
-
-    font-size:13px;
-
-    letter-spacing:1px;
-
-    z-index:500;
-}
-
-/* ==========================================================
-   Visualizer
-   ========================================================== */
-
-.timeline-spectrum{
-
-    height:34px;
-
-    background:#111;
-
-    border-top:1px solid var(--timeline-border);
-
-    position:relative;
-}
-
-.timeline-spectrum canvas{
-
-    position:absolute;
-
-    inset:0;
-
-    width:100%;
-    height:100%;
-}
-
-/* ==========================================================
-   Responsive
-   ========================================================== */
 
 @media (max-width:900px){
-
-    .timeline{
-
-        height:145px;
-    }
-
-    .timeline-toolbar{
-
-        height:34px;
-    }
-
-    .timeline-time{
-
-        font-size:12px;
-    }
-
-    .timeline-spectrum{
-
-        display:none;
-    }
+    .timeline { height:145px; }
+    .timeline-toolbar { height:34px; }
+    .timeline-time { font-size:12px; }
+    .timeline-spectrum { height:54px; flex-basis:54px; }
 }
-
-/* ==========================================================
-   Smooth Animations
-   ========================================================== */
 
 .timeline *,
 .timeline *::before,
-.timeline *::after{
-
-    box-sizing:border-box;
-}
-
-.timeline canvas{
-
-    image-rendering:auto;
-}
+.timeline *::after { box-sizing:border-box; }
+.timeline canvas { image-rendering:auto; }

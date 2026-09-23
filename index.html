@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
 
 <meta name="viewport"
@@ -12,78 +10,28 @@ content="width=device-width,initial-scale=1.0">
 <meta http-equiv="Expires" content="0">
 
 <title>StageCue</title>
-
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/layout.css">
 <link rel="stylesheet" href="css/components.css">
 <link rel="stylesheet" href="css/timeline.css">
 <link rel="stylesheet" href="css/welcome.css">
-
 </head>
-
-
 <body>
-
-
-<!-- ==========================================
-     TOP BAR
-========================================== -->
-
 <header id="topbar">
-
-
-<div id="logo">
-
-🎬 StageCue
-
-</div>
-
-
-<div id="toolbar">
-
-
-<button id="openFiles">
-Open
-</button>
-
-
-<button id="savePlaylist">
-Save
-</button>
-
-
-<button id="loadPlaylist">
-Load
-</button>
-
-
-<button id="outputWindow">
-Output
-</button>
-
-
-
-
-
-</div>
-
-
+    <div id="logo">🎬 StageCue</div>
+    <div id="toolbar">
+        <button id="openFiles">Open</button>
+        <button id="savePlaylist">Save</button>
+        <button id="loadPlaylist">Load</button>
+        <button id="outputWindow">Output</button>
+    </div>
 </header>
-
-
-
-
-<!-- ==========================================
-     WORKSPACE
-========================================== -->
-
 <main id="workspace">
 
 
 
 <!-- ==========================================
      PLAYLIST
-========================================== -->
 
 
 <aside id="playlistPanel">
@@ -113,7 +61,6 @@ Playlist
 
 <!-- ==========================================
      PREVIEW + TIMELINE
-========================================== -->
 
 
 <section id="previewPanel">
@@ -234,91 +181,16 @@ Tracks: 0
 
 
 </main>
-
-
-
-
-
-<!-- ==========================================
-     TRANSPORT
-========================================== -->
-
-
 <footer id="transport">
-
-
-
-<div>
-
-
-<button id="previous">
-⏮
-</button>
-
-
-<button id="play">
-▶
-</button>
-
-
-<button id="pause">
-⏸
-</button>
-
-
-<button id="stop">
-⏹
-</button>
-
-
-<button id="next">
-⏭
-</button>
-
-
-</div>
-
-
-
-
-
-<div id="volumeBox">
-
-
-🔊
-
-
-<input
-type="range"
-id="volume"
-min="0"
-max="1"
-step="0.01"
-value="1">
-
-
-</div>
-
-
-
-
-
-<label>
-
-
-<input
-type="checkbox"
-id="loopPlaylist">
-
-
-Loop Playlist
-
-
-</label>
-
-
-
-
+    <div>
+        <button id="previous">⏮</button>
+        <button id="play">▶</button>
+        <button id="pause">⏸</button>
+        <button id="stop">⏹</button>
+        <button id="next">⏭</button>
+    </div>
+    <div id="volumeBox">🔊 <input type="range" id="volume" min="0" max="1" step="0.01" value="1"></div>
+    <label><input type="checkbox" id="loopPlaylist"> Loop Playlist</label>
 </footer>
 
 
@@ -327,7 +199,6 @@ Loop Playlist
 
 <!-- ==========================================
      FILE INPUT
-========================================== -->
 
 
 <input
@@ -348,6 +219,4 @@ src="js/app.js?v=20260716">
 
 
 </body>
-
-
 </html>
