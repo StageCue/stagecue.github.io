@@ -117,6 +117,10 @@ export default class Timeline {
 
                 this.scroll.computeMax();
 
+                this.spectrum
+                    .connect()
+                    .catch(() => {});
+
             };
 
 
@@ -200,6 +204,28 @@ export default class Timeline {
                 "Missing media source"
             );
 
+
+        const isVideoSource =
+            (
+                source instanceof Blob &&
+                source.type?.startsWith("video/")
+            )
+            ||
+            (
+                typeof source === "string" &&
+                source.startsWith("blob:")
+            );
+
+
+        if (isVideoSource) {
+
+            await this.waveform.load(source);
+
+            this.scroll.computeMax();
+
+            return;
+
+        }
 
 
         await this.waveform.load(

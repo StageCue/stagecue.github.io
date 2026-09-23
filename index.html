@@ -2,10 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<meta name="viewport"
+content="width=device-width,initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
+
 <title>StageCue</title>
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/layout.css">
@@ -24,37 +27,159 @@
     </div>
 </header>
 <main id="workspace">
-    <aside id="playlistPanel">
-        <div class="panelHeader">Playlist <span id="playlistCount">0</span></div>
-        <div id="playlist"></div>
-    </aside>
-    <section id="previewPanel">
-        <div id="videoContainer">
-            <video id="preview" playsinline preload="metadata"></video>
-            <div id="previewOverlay">READY</div>
-            <div id="mediaBadge" class="mediaBadge" aria-live="polite"></div>
-        </div>
-        <div id="mediaInfo" class="mediaInfo" aria-live="polite">
-            <div class="mediaInfo__item"><span class="mediaInfo__label">Resolution</span><span id="mediaResolution" class="mediaInfo__value">--</span></div>
-            <div class="mediaInfo__item"><span class="mediaInfo__label">FPS</span><span id="mediaFps" class="mediaInfo__value">--</span></div>
-            <div class="mediaInfo__item"><span class="mediaInfo__label">Video</span><span id="mediaVideoCodec" class="mediaInfo__value">--</span></div>
-            <div class="mediaInfo__item"><span class="mediaInfo__label">Audio</span><span id="mediaAudioCodec" class="mediaInfo__value">--</span></div>
-            <div class="mediaInfo__item"><span class="mediaInfo__label">File size</span><span id="mediaFileSize" class="mediaInfo__value">--</span></div>
-            <div class="mediaInfo__item"><span class="mediaInfo__label">Bitrate</span><span id="mediaBitrate" class="mediaInfo__value">--</span></div>
-            <div class="mediaInfo__item" style="grid-column:1 / -1"><span class="mediaInfo__label">Time</span><span id="mediaTime" class="mediaInfo__value">00:00 / 00:00</span></div>
-        </div>
-        <div id="timeline">
-            <div class="timeline-toolbar">
-                <span id="current">00:00</span>
-                <input type="range" id="seek" min="0" max="100" value="0">
-                <span id="duration">00:00</span>
-                <span id="audioTrackCount">Tracks: 0</span>
-            </div>
-            <div class="timeline-ruler"><canvas></canvas></div>
-            <div class="timeline-waveform"><canvas></canvas></div>
-            <div class="timeline-spectrum"><canvas></canvas></div>
-        </div>
-    </section>
+
+
+
+<!-- ==========================================
+     PLAYLIST
+
+
+<aside id="playlistPanel">
+
+
+<div class="panelHeader">
+
+Playlist
+
+<span id="playlistCount">
+0
+</span>
+
+</div>
+
+
+<div id="playlist">
+
+</div>
+
+
+</aside>
+
+
+
+
+
+<!-- ==========================================
+     PREVIEW + TIMELINE
+
+
+<section id="previewPanel">
+
+
+
+<!-- VIDEO -->
+
+<div id="videoContainer">
+
+
+<video
+id="preview"
+playsinline
+preload="metadata">
+</video>
+
+
+<div id="previewOverlay">
+
+READY
+
+</div>
+
+
+</div>
+
+
+
+
+
+<!-- TIMELINE -->
+
+<div id="timeline">
+
+
+
+<!-- TIME CONTROL -->
+
+<div class="timeline-toolbar">
+
+
+<span id="current">
+00:00
+</span>
+
+
+<input
+type="range"
+id="seek"
+min="0"
+max="100"
+value="0">
+
+
+<span id="duration">
+00:00
+</span>
+
+
+<span id="audioTrackCount">
+Tracks: 0
+</span>
+
+
+</div>
+
+
+
+
+
+<!-- RULER -->
+
+<div class="timeline-ruler">
+
+
+<canvas></canvas>
+
+
+</div>
+
+
+
+
+
+<!-- WAVEFORM -->
+
+<div class="timeline-waveform">
+
+
+<canvas></canvas>
+
+
+</div>
+
+
+
+
+
+<!-- AUDIO VISUALIZER -->
+
+<div class="timeline-spectrum">
+
+
+<canvas></canvas>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+</section>
+
+
 </main>
 <footer id="transport">
     <div>
@@ -67,7 +192,31 @@
     <div id="volumeBox">🔊 <input type="range" id="volume" min="0" max="1" step="0.01" value="1"></div>
     <label><input type="checkbox" id="loopPlaylist"> Loop Playlist</label>
 </footer>
-<input type="file" id="filePicker" accept="video/*" multiple hidden>
-<script type="module" src="js/app.js?v=20260716"></script>
+
+
+
+
+
+<!-- ==========================================
+     FILE INPUT
+
+
+<input
+type="file"
+id="filePicker"
+accept="video/*"
+multiple
+hidden>
+
+
+
+
+
+<script
+type="module"
+src="js/app.js?v=20260716">
+</script>
+
+
 </body>
 </html>

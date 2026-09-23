@@ -207,7 +207,8 @@
 }
 
 #current,
-#duration{
+#duration,
+#audioTrackCount{
 
     width:60px;
 
