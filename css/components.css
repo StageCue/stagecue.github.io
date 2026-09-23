@@ -64,5 +64,22 @@ input[type=range]{ height:5px; }
 .output-adjustments__actions{ grid-template-columns:1fr; }
 .output-adjustments__actions button{ width:100%; }
 
+.mediaInfo{
+    display:grid;
+    grid-template-columns:repeat(2, minmax(120px, 1fr));
+    gap:8px 10px;
+    padding:10px 12px;
+    background:#14181d;
+    border-top:1px solid #2d353e;
+    border-bottom:1px solid #2d353e;
+    color:#dce7f7;
+    font-size:11px;
+    letter-spacing:.02em;
+}
+
+.mediaInfo__item{ display:flex; justify-content:space-between; gap:12px; min-width:0; }
+.mediaInfo__label{ color:#8ea3bf; }
+.mediaInfo__value{ color:#f0f5ff; text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
 @keyframes pulse{ 0%{opacity:1;} 50%{opacity:.45;} 100%{opacity:1;} }
 @keyframes spin{ from{transform:rotate(0deg);} to{transform:rotate(360deg);} }

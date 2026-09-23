@@ -23,6 +23,14 @@ export class Player {
         this.durationLabel = document.getElementById("duration");
         this.overlay = document.getElementById("previewOverlay");
 
+        this.mediaInfo = {
+            resolution: document.getElementById("mediaResolution"),
+            fps: document.getElementById("mediaFps"),
+            videoCodec: document.getElementById("mediaVideoCodec"),
+            audioCodec: document.getElementById("mediaAudioCodec"),
+            time: document.getElementById("mediaTime")
+        };
+
         this.currentClip = null;
         this.currentCue = null;
         this.videoURL = null;
@@ -44,10 +52,16 @@ export class Player {
 
     updateTime() {
         UI.updateTime(this);
+        UI.updateMediaInfo(this);
     }
 
     updateDuration() {
         UI.updateDuration(this);
+        UI.updateMediaInfo(this);
+    }
+
+    updateMediaInfo() {
+        UI.updateMediaInfo(this);
     }
 
     format(seconds) {
