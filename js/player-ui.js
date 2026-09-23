@@ -1,106 +1,115 @@
 // ==============================================
 // StageCue Player UI
-// Time Labels & Seek Bar
+// Time Labels & Media Metadata
 // ==============================================
 
 export function updateTime(player) {
-
     const current = player.video.currentTime;
-
     player.currentLabel.textContent = format(current);
-
-    if (player.video.duration) {
+    if (player.video.duration)
         player.seek.value = (current / player.video.duration) * 100;
-    }
-
+    updateMediaInfo(player);
 }
 
 export function updateDuration(player) {
     player.durationLabel.textContent = format(player.video.duration);
+    updateMediaInfo(player);
 }
 
 export function updateMediaInfo(player) {
     if (!player?.video) return;
 
-    const v = player.video;
-    const resolution = v.videoWidth && v.videoHeight ? `${v.videoWidth}×${v.videoHeight}` : "--";
-    const videoCodec = getVideoCodec(v);
-    const audioCodec = getAudioCodec(v);
-    const fps = getEstimatedFps(v);
-    const time = `${format(v.currentTime || 0)} / ${format(v.duration || 0)}`;
+    const video = player.video;
+    const clip = player.currentClip;
+    const resolution = video.videoWidth && video.videoHeight ? `${video.videoWidth}×${video.videoHeight}` : "--";
+    const fps = getEstimatedFps(video);
+    const videoCodec = getVideoCodec(video, clip);
+    const audioCodec = getAudioCodec(video, clip);
+    const size = clip?.file?.size || clip?.size || 0;
+    const duration = Number(video.duration) || Number(clip?.duration) || 0;
+    const bitrate = size && duration ? formatBitrate((size * 8) / duration) : "--";
+    const time = `${format(video.currentTime || 0)} / ${format(video.duration || 0)}`;
 
     setText(player.mediaInfo?.resolution, resolution);
     setText(player.mediaInfo?.fps, fps);
     setText(player.mediaInfo?.videoCodec, videoCodec);
     setText(player.mediaInfo?.audioCodec, audioCodec);
+    setText(player.mediaInfo?.fileSize, size ? formatBytes(size) : "--");
+    setText(player.mediaInfo?.bitrate, bitrate);
     setText(player.mediaInfo?.time, time);
+
+    const badge = document.getElementById("mediaBadge");
+    if (badge) {
+        badge.textContent = size
+            ? `${resolution} • ${fps} • ${formatBytes(size)}`
+            : `${resolution} • ${fps}`;
+        badge.hidden = !resolution || resolution === "--";
+    }
 }
 
-function setText(el, value) {
-    if (el) el.textContent = value ?? "--";
+function setText(element, value) {
+    if (element) element.textContent = value ?? "--";
 }
 
 function getEstimatedFps(video) {
-    const src = (video.currentSrc || video.src || "").toLowerCase();
-    const mime = video.mimeType || "";
-
-    if (video.webkitDecodedFrameCount && video.webkitDecodedFrameCount > 0) {
-        const now = performance.now();
-        const frames = video.webkitDecodedFrameCount;
+    const frames = video.getVideoPlaybackQuality?.().totalVideoFrames;
+    const now = performance.now();
+    if (Number.isFinite(frames)) {
         if (video.__fpsSampleAt) {
             const elapsed = (now - video.__fpsSampleAt) / 1000;
-            if (elapsed > 0.25)
-                return `${Math.max(1, Math.round((frames - video.__fpsSampleAtFrames) / elapsed))} fps`;
+            if (elapsed >= 0.5) {
+                const fps = Math.round((frames - video.__fpsSampleFrames) / elapsed);
+                video.__fpsSampleAt = now;
+                video.__fpsSampleFrames = frames;
+                if (fps > 0 && fps < หว) return `${fps} fps`;
+            }
+        } else {
+            video.__fpsSampleAt = now;
+            video.__fpsSampleFrames = frames;
         }
-        video.__fpsSampleAt = now;
-        video.__fpsSampleAtFrames = frames;
     }
-
-    if (src.includes(".mov") || src.includes(".m4v") || mime.includes("quicktime"))
-        return "24 fps";
-    if (src.includes(".mp4") || mime.includes("mp4"))
-        return "30 fps";
-    if (src.includes(".webm") || mime.includes("webm"))
-        return "30 fps";
-    if (src.includes(".mkv") || mime.includes("matroska"))
-        return "24 fps";
-
     return "--";
 }
 
-function getVideoCodec(video) {
-    const src = (video.currentSrc || video.src || "").toLowerCase();
-    const mime = video.mimeType || "";
-    if (src.includes(".mp4") || mime.includes("mp4")) return "H.264 / AVC";
-    if (src.includes(".webm") || mime.includes("webm")) return "VP8 / VP9";
-    if (src.includes(".mov") || mime.includes("quicktime")) return "H.264 / ProRes";
-    if (src.includes(".mkv") || mime.includes("matroska")) return "H.264 / HEVC";
+function getVideoCodec(video, clip) {
+    const type = (clip?.file?.type || video.currentSrc || video.src || "").toLowerCase();
+    if (type.includes("av01")) return "AV1";
+    if (type.includes("hevc") || type.includes("hvc1")) return "HEVC / H.265";
+    if (type.includes("vp9") || type.includes("webm")) return "VP9 / WebM*";
+    if (type.includes("vp8")) return "VP8*";
+    if (type.includes("avc") || type.includes("mp4") || type.includes("quicktime")) return "H.264 / AVC*";
     return "--";
 }
 
-function getAudioCodec(video) {
-    const src = (video.currentSrc || video.src || "").toLowerCase();
-    const mime = video.mimeType || "";
-    if (src.includes(".mp4") || mime.includes("mp4")) return "AAC";
-    if (src.includes(".webm") || mime.includes("webm")) return "Vorbis / Opus";
-    if (src.includes(".mov") || mime.includes("quicktime")) return "AAC / PCM";
-    if (src.includes(".mkv") || mime.includes("matroska")) return "AAC / Opus";
+function getAudioCodec(video, clip) {
+    const type = (clip?.file?.type || video.currentSrc || video.src || "").toLowerCase();
+    if (type.includes("opus")) return "Opus*";
+    if (type.includes("vorbis")) return "Vorbis*";
+    if (type.includes("mp4") || type.includes("quicktime")) return "AAC*";
+    if (type.includes("webm")) return "Opus / Vorbis*";
     return "--";
+}
+
+function formatBytes(bytes) {
+    if (!Number.isFinite(bytes) || bytes <= 0) return "--";
+    const units = ["B", "KB", "MB", "GB"];
+    const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+    return `${(bytes / 1024 ** index).toFixed(index ? 2 : 0)} ${units[index]}`;
+}
+
+function formatBitrate(bitsPerSecond) {
+    if (!Number.isFinite(bitsPerSecond) || bitsPerSecond <= 0) return "--";
+    return bitsPerSecond >= 1_000_000
+        ? `${(bitsPerSecond / 1_000_000).toFixed(2)} Mbps`
+        : `${Math.round(bitsPerSecond / 1_000)} kbps`;
 }
 
 export function format(seconds) {
-
-    if (isNaN(seconds) || seconds < 0)
-        return "00:00";
-
+    if (isNaN(seconds) || seconds < 0) return "00:00";
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = Math.floor(seconds % 60);
-
-    if (hours > 0) {
-        return hours + ":" + String(minutes).padStart(2, "0") + ":" + String(secs).padStart(2, "0");
-    }
-
-    return String(minutes).padStart(2, "0") + ":" + String(secs).padStart(2, "0");
-
+    return hours > 0
+        ? `${hours}:${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`
+        : `${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
 }
