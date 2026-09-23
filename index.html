@@ -2,13 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-
 <title>StageCue</title>
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="css/layout.css">
@@ -26,161 +23,36 @@ content="width=device-width,initial-scale=1.0">
         <button id="outputWindow">Output</button>
     </div>
 </header>
+
 <main id="workspace">
-
-
-
-<!-- ==========================================
-     PLAYLIST
-
-
-<aside id="playlistPanel">
-
-
-<div class="panelHeader">
-
-Playlist
-
-<span id="playlistCount">
-0
-</span>
-
-</div>
-
-
-<div id="playlist">
-
-</div>
-
-
-</aside>
-
-
-
-
-
-<!-- ==========================================
-     PREVIEW + TIMELINE
-
-
-<section id="previewPanel">
-
-
-
-<!-- VIDEO -->
-
-<div id="videoContainer">
-
-
-<video
-id="preview"
-playsinline
-preload="metadata">
-</video>
-
-
-<div id="previewOverlay">
-
-READY
-
-</div>
-
-
-</div>
-
-
-
-
-
-<!-- TIMELINE -->
-
-<div id="timeline">
-
-
-
-<!-- TIME CONTROL -->
-
-<div class="timeline-toolbar">
-
-
-<span id="current">
-00:00
-</span>
-
-
-<input
-type="range"
-id="seek"
-min="0"
-max="100"
-value="0">
-
-
-<span id="duration">
-00:00
-</span>
-
-
-<span id="audioTrackCount">
-Tracks: 0
-</span>
-
-
-</div>
-
-
-
-
-
-<!-- RULER -->
-
-<div class="timeline-ruler">
-
-
-<canvas></canvas>
-
-
-</div>
-
-
-
-
-
-<!-- WAVEFORM -->
-
-<div class="timeline-waveform">
-
-
-<canvas></canvas>
-
-
-</div>
-
-
-
-
-
-<!-- AUDIO VISUALIZER -->
-
-<div class="timeline-spectrum">
-
-
-<canvas></canvas>
-
-
-</div>
-
-
-
-</div>
-
-
-
-
-</section>
-
-
+    <aside id="playlistPanel">
+        <div class="panelHeader">
+            Playlist
+            <span id="playlistCount">0</span>
+        </div>
+        <div id="playlist"></div>
+    </aside>
+
+    <section id="previewPanel">
+        <div id="videoContainer">
+            <video id="preview" playsinline preload="metadata"></video>
+            <div id="previewOverlay">READY</div>
+        </div>
+
+        <div id="timeline">
+            <div class="timeline-toolbar">
+                <span id="current">00:00</span>
+                <input type="range" id="seek" min="0" max="100" value="0">
+                <span id="duration">00:00</span>
+                <span id="audioTrackCount">Tracks: 0</span>
+            </div>
+            <div class="timeline-ruler"><canvas></canvas></div>
+            <div class="timeline-waveform"><canvas></canvas></div>
+            <div class="timeline-spectrum"><canvas></canvas></div>
+        </div>
+    </section>
 </main>
+
 <footer id="transport">
     <div>
         <button id="previous">⏮</button>
@@ -193,30 +65,8 @@ Tracks: 0
     <label><input type="checkbox" id="loopPlaylist"> Loop Playlist</label>
 </footer>
 
+<input type="file" id="filePicker" accept="video/*" multiple hidden>
 
-
-
-
-<!-- ==========================================
-     FILE INPUT
-
-
-<input
-type="file"
-id="filePicker"
-accept="video/*"
-multiple
-hidden>
-
-
-
-
-
-<script
-type="module"
-src="js/app.js?v=20260716">
-</script>
-
-
+<script type="module" src="js/app.js?v=20260923"></script>
 </body>
 </html>
