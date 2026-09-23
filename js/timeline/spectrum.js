@@ -22,15 +22,16 @@ export default class Spectrum {
         this.minDecibels = -90;
         this.maxDecibels = -12;
 
-        this.barWidth = 3;
+        this.barWidth = 4;
         this.barGap = 2;
         this.peaks = [];
-        this.peakFall = 0.010;
+        this.peakFall = 0.013;
         this.lastBass = 0;
         this.beatPulse = 0;
 
         this.data = null;
         this.wave = null;
+        this.bandCount = 52;
     }
 
     async connect() {
@@ -56,7 +57,7 @@ export default class Spectrum {
 
         this.data = new Uint8Array(this.analyser.frequencyBinCount);
         this.wave = new Uint8Array(this.analyser.fftSize);
-        this.peaks = new Float32Array(Math.max(32, Math.floor(this.analyser.frequencyBinCount / 12)));
+        this.peaks = new Float32Array(this.bandCount);
         this.connected = true;
     }
 
@@ -104,10 +105,10 @@ export default class Spectrum {
             ctx.stroke();
         }
 
-        ctx.strokeStyle = "rgba(255,255,255,.16)";
+        ctx.strokeStyle = "rgba(255,255,255,.15)";
         ctx.beginPath();
-        ctx.moveTo(0, height - 1.5);
-        ctx.lineTo(width, height - 1.5);
+        ctx.moveTo(0, height / 2 + .5);
+        ctx.lineTo(width, height / 2 + .5);
         ctx.stroke();
         ctx.restore();
     }
@@ -123,30 +124,13 @@ export default class Spectrum {
     drawBars(ctx, width, height) {
         const center = height / 2;
         const maxHeight = Math.max(8, center - 6);
-        const count = Math.max(24, Math.floor(width / (this.barWidth + this.barGap)));
-        const step = this.data.length / count;
+        const visibleBars = Math.min(this.bandCount, Math.max(24, Math.floor(width / (this.barWidth + this.barGap))));
 
         ctx.save();
         ctx.lineWidth = 1;
 
-        for (let i = 0; i < count; i++) {
-            const start = Math.floor(i * step);
-            const end = Math.max(start + 1, Math.floor((i + 1) * step));
-
-            let bandValue = 0;
-            let total = 0;
-            let weight = 0;
-
-            for (let j = start; j < end && j < this.data.length; j++) {
-                const value = this.data[j] / 255;
-                const weightFactor = 1 + Math.log2(j + 2);
-                total += value * weightFactor;
-                weight += weightFactor;
-            }
-
-            if (weight > 0)
-                bandValue = total / weight;
-
+        for (let i = 0; i < visibleBars; i++) {
+            const bandValue = this.getBandValue(i, visibleBars);
             const level = Math.pow(Math.min(1, bandValue), 0.72);
             const barHeight = Math.max(2, level * maxHeight);
             const x = i * (this.barWidth + this.barGap);
@@ -154,26 +138,27 @@ export default class Spectrum {
 
             this.peaks[i] = Math.max(level, peak - this.peakFall);
 
-            const color = this.getBandColor(i / count, level);
+            const color = this.getBandColor(i / visibleBars, level);
             ctx.fillStyle = color;
-            ctx.shadowBlur = 10 + level * 14;
             ctx.shadowColor = color;
+            ctx.shadowBlur = 12 + level * 16;
+
             ctx.fillRect(x, center - barHeight, this.barWidth, barHeight);
-            ctx.fillRect(x, center, this.barWidth, barHeight);
+            ctx.fillRect(x, center + 1, this.barWidth, barHeight);
 
             if (this.peaks[i] > 0.04) {
-                ctx.fillStyle = "rgba(255,255,255,0.9)";
-                const peakY = center - this.peaks[i] * maxHeight;
-                const peakYb = center + this.peaks[i] * maxHeight;
-                ctx.fillRect(x, peakY, this.barWidth, 2);
-                ctx.fillRect(x, peakYb, this.barWidth, 2);
+                ctx.fillStyle = "rgba(255,255,255,0.88)";
+                const peakYTop = center - this.peaks[i] * maxHeight;
+                const peakYBottom = center + 1 + this.peaks[i] * maxHeight;
+                ctx.fillRect(x, peakYTop, this.barWidth, 2);
+                ctx.fillRect(x, peakYBottom, this.barWidth, 2);
             }
         }
 
         ctx.restore();
 
         ctx.save();
-        ctx.strokeStyle = `rgba(255,255,255,${0.16 + this.beatPulse * 0.18})`;
+        ctx.strokeStyle = `rgba(255,255,255,${0.16 + this.beatPulse * 0.2})`;
         ctx.beginPath();
         ctx.moveTo(0, center + 0.5);
         ctx.lineTo(width, center + 0.5);
@@ -183,6 +168,29 @@ export default class Spectrum {
         this.beatPulse *= 0.88;
     }
 
+    getBandValue(index, totalBars) {
+        const maxBins = this.data.length;
+        const startNorm = Math.pow(index / totalBars, 1.45);
+        const endNorm = Math.pow((index + 1) / totalBars, 1.45);
+
+        const start = Math.floor(startNorm * maxBins);
+        const end = Math.min(maxBins, Math.ceil(endNorm * maxBins));
+        if (end <= start)
+            return 0;
+
+        let total = 0;
+        let weight = 0;
+
+        for (let bin = start; bin < end; bin++) {
+            const v = this.data[bin] / 255;
+            const logBoost = 1 + Math.log2(bin + 2);
+            total += v * logBoost;
+            weight += logBoost;
+        }
+
+        return weight > 0 ? total / weight : 0;
+    }
+
     getBandColor(normalized, level) {
         const low = ["#00f5d4", "#3dd9ff", "#81f4ff"];
         const mid = ["#5aa9ff", "#5b82ff", "#7f7bff"];
@@ -190,21 +198,22 @@ export default class Spectrum {
 
         if (normalized < 0.38)
             return this.mixColors(low, level);
-        if (normalized < 0.72)
+        if (normalized < 0.76)
             return this.mixColors(mid, level);
         return this.mixColors(high, level);
     }
 
     mixColors(colors, level) {
-        const i = Math.min(colors.length - 1, Math.max(0, Math.floor(level * (colors.length - 1))));
-        const next = colors[Math.min(colors.length - 1, i + 1)] || colors[i];
-        const t = Math.min(1, Math.max(0, level * (colors.length - 1) - i));
-        return this.interpolateHex(colors[i], next, t);
+        const idx = Math.min(colors.length - 1, Math.max(0, Math.floor(level * (colors.length - 1))));
+        const next = colors[Math.min(colors.length - 1, idx + 1)] || colors[idx];
+        const t = Math.min(1, Math.max(0, level * (colors.length - 1) - idx));
+        return this.interpolateHex(colors[idx], next, t);
     }
 
     interpolateHex(a, b, t) {
         const ah = parseInt(a.slice(1), 16);
         const bh = parseInt(b.slice(1), 16);
+
         const ar = (ah >> 16) & 255;
         const ag = (ah >> 8) & 255;
         const ab = ah & 255;
